@@ -1,34 +1,59 @@
-// screens/SignUpScreen.js
+// screens/SignUpScreen.tsx
 import React, { useState } from "react";
-import { View, Text, Button, TextInput, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
+import { supabase } from "../supabase"; 
 
 function SignUpScreen({ navigation }: any) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!username || !email || !password) {
       Alert.alert("Missing Fields", "Please fill out all fields.");
       return;
     }
 
-    // Simulate user creation (replace with actual API call or DB logic)
-    const newUser = {
-      username,
-      email,
-      password,
-      created_at: new Date().toISOString(),
-      points: 0,
-    };
+    setLoading(true);
 
-    console.log("User signed up:", newUser);
-    navigation.replace("Dashboard");
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      const user = data.user;
+      const { error: insertError } = await supabase.from("users").insert([
+        {
+          id: user?.id, 
+          username,
+          email,
+          points: 0,
+        },
+      ]);
+
+      if (insertError) throw insertError;
+
+      Alert.alert(
+        "Success",
+        "Account created successfully! Please check your email to confirm."
+      );
+      navigation.replace("Dashboard");
+    } catch (err: any) {
+      console.error("Sign up error:", err.message);
+      Alert.alert("Sign up failed", err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Sign Up</Text>
+
       <TextInput
         placeholder="Username"
         value={username}
@@ -49,7 +74,13 @@ function SignUpScreen({ navigation }: any) {
         secureTextEntry
         style={styles.input}
       />
-      <Button title="Create Account" onPress={handleSignUp} />
+
+      <Button
+        title={loading ? "Creating Account..." : "Create Account"}
+        onPress={handleSignUp}
+        disabled={loading}
+      />
+
       <Text onPress={() => navigation.navigate("SignIn")} style={styles.link}>
         Already have an account? Sign in
       </Text>

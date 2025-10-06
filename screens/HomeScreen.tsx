@@ -55,24 +55,7 @@ function HomeScreen({ navigation }: any) {
         )}
       />
 
-      <View style={styles.bottomNav}>
-        <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-          <Ionicons name="home-outline" size={24} color="#fff" />
-          <Text style={styles.navText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("CreateQuiz")}>
-          <Ionicons name="create-outline" size={24} color="#fff" />
-          <Text style={styles.navText}>Create Quiz</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Leaderboard")}>
-          <Ionicons name="podium-outline" size={24} color="#fff" />
-          <Text style={styles.navText}>Leaderboard</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
-          <Ionicons name="person-outline" size={24} color="#fff" />
-          <Text style={styles.navText}>Profile</Text>
-        </TouchableOpacity>
-      </View>
+      
     </View>
   );
 }

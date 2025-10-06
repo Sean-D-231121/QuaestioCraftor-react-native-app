@@ -4,139 +4,197 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  TextInput,
   ScrollView,
 } from "react-native";
+import Slider from "@react-native-community/slider";
+import { Ionicons } from "@expo/vector-icons";
 
-const quizData = {
-  title: "General Knowledge Quiz",
-  questions: [
-    {
-      id: 1,
-      text: "Which planet is known as the Red Planet?",
-      options: ["Venus", "Jupiter", "Earth", "Mars"],
-      answer: 3,
-      explanation:
-        "Mars is known as the Red Planet due to its reddish appearance caused by iron oxide.",
-    },
-    {
-      id: 2,
-      text: "What is the chemical formula for water?",
-      options: ["NaCl", "CO₂", "H₂O", "O₂"],
-      answer: 2,
-      explanation:
-        "Water is composed of two hydrogen atoms and one oxygen atom: H₂O.",
-    },
-    // Add more questions as needed
-  ],
-};
-
-export default function QuizScreen({ navigation }: any) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [showExplanation, setShowExplanation] = useState(false);
-  const [score, setScore] = useState(0);
-
-  const currentQuestion = quizData.questions[currentIndex];
-
-  const handleOptionPress = (index: number) => {
-    setSelectedOption(index);
-    setShowExplanation(true);
-    if (index === currentQuestion.answer) {
-      setScore((prev) => prev + 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentIndex < quizData.questions.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setSelectedOption(null);
-      setShowExplanation(false);
-    } else {
-      navigation.navigate("ResultScreen", {
-        score,
-        total: quizData.questions.length,
-      });
-    }
-  };
+export default function CreateQuizScreen() {
+  const [quizType, setQuizType] = useState<string | null>(null);
+  const [difficulty, setDifficulty] = useState<string | null>(null);
+  const [questionCount, setQuestionCount] = useState(15);
+  const [topic, setTopic] = useState("");
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>{quizData.title}</Text>
-      <Text style={styles.question}>{currentQuestion.text}</Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.avatar} />
+        <View>
+          <Text style={styles.welcome}>Welcome</Text>
+          <Text style={styles.username}>Hello Sean!</Text>
+        </View>
+      </View>
 
-      {currentQuestion.options.map((option, index) => {
-        const isSelected = selectedOption === index;
-        const isCorrect = index === currentQuestion.answer;
-        const optionStyle = isSelected
-          ? isCorrect
-            ? styles.correctOption
-            : styles.wrongOption
-          : styles.option;
-
-        return (
+      <View style={styles.buttonRow}>
+        {["MCQ", "True/False", "Short answer"].map((type) => (
           <TouchableOpacity
-            key={index}
-            style={optionStyle}
-            disabled={selectedOption !== null}
-            onPress={() => handleOptionPress(index)}
+            key={type}
+            style={[
+              styles.typeButton,
+              quizType === type && styles.activeButton,
+            ]}
+            onPress={() => setQuizType(type)}
           >
-            <Text style={styles.optionText}>{option}</Text>
+            <Text
+              style={[
+                styles.buttonText,
+                quizType === type && styles.activeButtonText,
+              ]}
+            >
+              {type}
+            </Text>
           </TouchableOpacity>
-        );
-      })}
+        ))}
+      </View>
 
-      {showExplanation && (
-        <Text style={styles.explanation}>💡 {currentQuestion.explanation}</Text>
-      )}
+      {/* Difficulty Buttons */}
+      <View style={styles.buttonRow}>
+        {["Easy", "Medium", "Hard"].map((level) => (
+          <TouchableOpacity
+            key={level}
+            style={[
+              styles.typeButton,
+              difficulty === level && styles.activeButton,
+            ]}
+            onPress={() => setDifficulty(level)}
+          >
+            <Text
+              style={[
+                styles.buttonText,
+                difficulty === level && styles.activeButtonText,
+              ]}
+            >
+              {level}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
-      {selectedOption !== null && (
-        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-          <Text style={styles.nextText}>
-            {currentIndex < quizData.questions.length - 1
-              ? "Next Question"
-              : "View Results"}
-          </Text>
+      {/* Question Slider */}
+      <Text style={styles.sectionTitle}>{questionCount} Questions</Text>
+      <Slider
+        style={{ width: "100%" }}
+        minimumValue={5}
+        maximumValue={50}
+        step={1}
+        minimumTrackTintColor="#6C63FF"
+        maximumTrackTintColor="#ddd"
+        thumbTintColor="#6C63FF"
+        value={questionCount}
+        onValueChange={(val :any) => setQuestionCount(val)}
+      />
+
+      {/* File Upload Placeholder */}
+      <View style={styles.uploadBox}>
+        <Text style={styles.uploadText}>
+          Drag and drop file(.jpeg, .png, .pdf)
+        </Text>
+      </View>
+
+      {/* Input for topic */}
+      <View style={styles.inputContainer}>
+        <TextInput
+          placeholder="please enter what you want to test on."
+          placeholderTextColor="#666"
+          style={styles.input}
+          value={topic}
+          onChangeText={setTopic}
+        />
+        <TouchableOpacity style={styles.arrowButton}>
+          <Ionicons name="arrow-forward" size={20} color="#fff" />
         </TouchableOpacity>
-      )}
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, backgroundColor: "#f9f9f9", flexGrow: 1 },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
-  question: { fontSize: 18, marginBottom: 15 },
-  option: {
-    backgroundColor: "#eee",
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
+  container: {
+    padding: 20,
+    backgroundColor: "#fff",
+    flexGrow: 1,
   },
-  correctOption: {
-    backgroundColor: "#c8e6c9",
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 25,
   },
-  wrongOption: {
-    backgroundColor: "#ffcdd2",
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#ccc",
+    marginRight: 10,
   },
-  optionText: { fontSize: 16 },
-  explanation: {
-    marginTop: 15,
+  welcome: {
     fontSize: 14,
-    color: "#555",
-    fontStyle: "italic",
+    color: "#333",
   },
-  nextButton: {
-    backgroundColor: "#6C63FF",
-    padding: 15,
+  username: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 15,
+  },
+  typeButton: {
+    flex: 1,
+    backgroundColor: "#EDE7F6",
+    marginHorizontal: 5,
+    paddingVertical: 12,
     borderRadius: 8,
+    alignItems: "center",
+  },
+  activeButton: {
+    backgroundColor: "#6C63FF",
+  },
+  buttonText: {
+    color: "#333",
+    fontWeight: "500",
+  },
+  activeButtonText: {
+    color: "#fff",
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginVertical: 15,
+    textAlign: "center",
+    color: "#1A1A60",
+  },
+  uploadBox: {
+    backgroundColor: "#1A1A60",
+    borderRadius: 12,
+    padding: 40,
     marginTop: 20,
     alignItems: "center",
   },
-  nextText: { color: "#fff", fontWeight: "600" },
+  uploadText: {
+    color: "#fff",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 25,
+    backgroundColor: "#EDE7F6",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 14,
+  },
+  arrowButton: {
+    backgroundColor: "#1A1A60",
+    padding: 10,
+    borderRadius: 20,
+  },
 });
