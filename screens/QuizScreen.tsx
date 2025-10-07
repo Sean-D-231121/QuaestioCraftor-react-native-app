@@ -18,7 +18,7 @@ export default function CreateQuizScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Header */}
+      
       <View style={styles.header}>
         <View style={styles.avatar} />
         <View>
@@ -27,6 +27,7 @@ export default function CreateQuizScreen() {
         </View>
       </View>
 
+      {/* Quiz Type Buttons */}
       <View style={styles.buttonRow}>
         {["MCQ", "True/False", "Short answer"].map((type) => (
           <TouchableOpacity
@@ -101,6 +102,9 @@ export default function CreateQuizScreen() {
           style={styles.input}
           value={topic}
           onChangeText={setTopic}
+          multiline={true}
+          numberOfLines={2}
+          blurOnSubmit={false}
         />
         <TouchableOpacity style={styles.arrowButton}>
           <Ionicons name="arrow-forward" size={20} color="#fff" />
@@ -186,15 +190,28 @@ const styles = StyleSheet.create({
     backgroundColor: "#EDE7F6",
     borderRadius: 8,
     paddingHorizontal: 10,
+    paddingVertical: 8,
+    position: 'relative',
   },
   input: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 8,
+    paddingRight: 56, 
     fontSize: 14,
+    minHeight: 44,
+    textAlignVertical: 'top',
   },
   arrowButton: {
     backgroundColor: "#1A1A60",
     padding: 10,
     borderRadius: 20,
+    position: 'absolute',
+    right: 8,
+    top: '50%',
+    transform: [{ translateY: -20 }],
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
