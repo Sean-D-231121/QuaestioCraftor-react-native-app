@@ -13,20 +13,33 @@ import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
 
 
-async function generateQuiz({ quizType, difficulty, questionCount, topic }: any) {
+async function generateQuiz({ quizType, difficulty, questionCount, topic } : any) {
+  const prompt = `Generate ${questionCount} ${difficulty} level ${quizType} quiz questions about ${topic} in JSON format.
+The JSON should be an array of objects where each object has:
+- "question": the question text,
+- "options": an array of answer options (if quizType is "MCQ"; otherwise omit or leave empty),
+- "answer": the correct answer.
+-type": the type of question ("MCQ", "True/False", "Short answer").
+Ensure it is a valid JSON.`;
 
-  return Array.from({ length: questionCount }).map((_, i) => ({
-    type: quizType,
-    question: `Sample question ${i + 1} about ${topic}?`,
-    options:
-      quizType === "MCQ"
-        ? ["Option A", "Option B", "Option C", "Option D"]
-        : undefined,
-    answer: quizType === "MCQ" ? "Option A" : quizType === "True/False" ? "True" : "",
-  }));
+  const response = await fetch("http://192.168.0.116:8000/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt, max_tokens: 2000 }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail);
+  }
+
+ 
+  
+  const quiz = await response.json();
+  return quiz;
 }
 
-export default function CreateQuizScreen({ navigation }: any) {
+function CreateQuizScreen({ navigation }: any) {
   const [quizType, setQuizType] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState<string | null>(null);
   const [questionCount, setQuestionCount] = useState(5);
@@ -40,10 +53,15 @@ export default function CreateQuizScreen({ navigation }: any) {
     }
     setLoading(true);
     try {
-      const quiz = await generateQuiz({ quizType, difficulty, questionCount, topic });
+      const quiz = await generateQuiz({
+        quizType,
+        difficulty,
+        questionCount,
+        topic,
+      });
       navigation.navigate("QuizPlayerScreen", { quiz });
-    } catch (e) {
-      Alert.alert("Failed to generate quiz");
+    } catch (error: any) {
+      Alert.alert("Failed to generate quiz", error.message);
     }
     setLoading(false);
   };
@@ -132,6 +150,7 @@ export default function CreateQuizScreen({ navigation }: any) {
     </ScrollView>
   );
 }
+export default CreateQuizScreen;
 
 const styles = StyleSheet.create({
   container: {

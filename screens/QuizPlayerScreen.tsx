@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
-
-export default function QuizPlayerScreen({ route, navigation }: any) {
+function QuizPlayerScreen({ route, navigation }: any) {
   const { quiz } = route.params;
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<any[]>([]);
@@ -9,8 +8,17 @@ export default function QuizPlayerScreen({ route, navigation }: any) {
 
   const question = quiz[current];
 
-  const handleAnswer = (answer: string) => {
-    setAnswers([...answers, { question: question.question, answer }]);
+   const handleAnswer = (answer: string) => {
+    //  Store both user answer and correct answer
+    setAnswers([
+      ...answers,
+      { 
+        question: question.question, 
+        selected: answer, 
+        correct: question.answer 
+      },
+    ]);
+
     if (current + 1 < quiz.length) {
       setCurrent(current + 1);
     } else {
@@ -19,16 +27,39 @@ export default function QuizPlayerScreen({ route, navigation }: any) {
   };
 
   if (finished) {
+    // Separate correct and wrong answers
+    const wrongAnswers = answers.filter(a => a.selected !== a.correct);
+    const correctCount = answers.length - wrongAnswers.length;
+
     return (
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Quiz Finished!</Text>
-        <Text style={styles.subtitle}>You answered {answers.length} questions.</Text>
+        <Text style={styles.subtitle}>
+          You got {correctCount} / {answers.length} correct.
+        </Text>
+
+        {wrongAnswers.length > 0 ? (
+          <>
+            <Text style={[styles.title, { marginTop: 20 }]}>Questions You Got Wrong:</Text>
+            {wrongAnswers.map((item, index) => (
+              <View key={index} style={styles.wrongCard}>
+                <Text style={styles.question}>{item.question}</Text>
+                <Text style={styles.wrongText}>Your Answer: {item.selected}</Text>
+                <Text style={styles.correctText}>Correct Answer: {item.correct}</Text>
+              </View>
+            ))}
+          </>
+        ) : (
+          <Text style={{ color: "green", marginVertical: 20 }}>Perfect Score! 🎉</Text>
+        )}
+
         <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
           <Text style={styles.buttonText}>Back to Home</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     );
   }
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -59,6 +90,8 @@ export default function QuizPlayerScreen({ route, navigation }: any) {
     </ScrollView>
   );
 }
+  
+export default QuizPlayerScreen;
 
 const styles = StyleSheet.create({
   container: { flexGrow: 1, justifyContent: "center", alignItems: "center", padding: 20, backgroundColor: "#fff" },
@@ -67,4 +100,7 @@ const styles = StyleSheet.create({
   question: { fontSize: 18, marginBottom: 20, color: "#000" },
   button: { backgroundColor: "#6C63FF", padding: 16, borderRadius: 12, marginVertical: 8, width: "100%", alignItems: "center" },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  wrongText: { color: "#B91C1C", fontSize: 14 },
+  correctText: { color: "#047857", fontSize: 14 },
+  wrongCard: { backgroundColor: "#FEE2E2", borderRadius: 10, padding: 12, marginVertical: 6, width: "100%" },
 });
