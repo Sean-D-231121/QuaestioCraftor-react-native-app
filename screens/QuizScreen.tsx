@@ -6,19 +6,50 @@ import {
   StyleSheet,
   TextInput,
   ScrollView,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function CreateQuizScreen() {
+
+async function generateQuiz({ quizType, difficulty, questionCount, topic }: any) {
+
+  return Array.from({ length: questionCount }).map((_, i) => ({
+    type: quizType,
+    question: `Sample question ${i + 1} about ${topic}?`,
+    options:
+      quizType === "MCQ"
+        ? ["Option A", "Option B", "Option C", "Option D"]
+        : undefined,
+    answer: quizType === "MCQ" ? "Option A" : quizType === "True/False" ? "True" : "",
+  }));
+}
+
+export default function CreateQuizScreen({ navigation }: any) {
   const [quizType, setQuizType] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState<string | null>(null);
-  const [questionCount, setQuestionCount] = useState(15);
+  const [questionCount, setQuestionCount] = useState(5);
   const [topic, setTopic] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleCreateQuiz = async () => {
+    if (!quizType || !difficulty || !topic) {
+      Alert.alert("Please fill all fields");
+      return;
+    }
+    setLoading(true);
+    try {
+      const quiz = await generateQuiz({ quizType, difficulty, questionCount, topic });
+      navigation.navigate("QuizPlayerScreen", { quiz });
+    } catch (e) {
+      Alert.alert("Failed to generate quiz");
+    }
+    setLoading(false);
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      
       <View style={styles.header}>
         <View style={styles.avatar} />
         <View>
@@ -32,18 +63,10 @@ export default function CreateQuizScreen() {
         {["MCQ", "True/False", "Short answer"].map((type) => (
           <TouchableOpacity
             key={type}
-            style={[
-              styles.typeButton,
-              quizType === type && styles.activeButton,
-            ]}
+            style={[styles.typeButton, quizType === type && styles.activeButton]}
             onPress={() => setQuizType(type)}
           >
-            <Text
-              style={[
-                styles.buttonText,
-                quizType === type && styles.activeButtonText,
-              ]}
-            >
+            <Text style={[styles.buttonText, quizType === type && styles.activeButtonText]}>
               {type}
             </Text>
           </TouchableOpacity>
@@ -55,18 +78,10 @@ export default function CreateQuizScreen() {
         {["Easy", "Medium", "Hard"].map((level) => (
           <TouchableOpacity
             key={level}
-            style={[
-              styles.typeButton,
-              difficulty === level && styles.activeButton,
-            ]}
+            style={[styles.typeButton, difficulty === level && styles.activeButton]}
             onPress={() => setDifficulty(level)}
           >
-            <Text
-              style={[
-                styles.buttonText,
-                difficulty === level && styles.activeButtonText,
-              ]}
-            >
+            <Text style={[styles.buttonText, difficulty === level && styles.activeButtonText]}>
               {level}
             </Text>
           </TouchableOpacity>
@@ -84,7 +99,7 @@ export default function CreateQuizScreen() {
         maximumTrackTintColor="#ddd"
         thumbTintColor="#6C63FF"
         value={questionCount}
-        onValueChange={(val :any) => setQuestionCount(val)}
+        onValueChange={setQuestionCount}
       />
 
       {/* File Upload Placeholder */}
@@ -106,8 +121,12 @@ export default function CreateQuizScreen() {
           numberOfLines={2}
           blurOnSubmit={false}
         />
-        <TouchableOpacity style={styles.arrowButton}>
-          <Ionicons name="arrow-forward" size={20} color="#fff" />
+        <TouchableOpacity style={styles.arrowButton} onPress={handleCreateQuiz} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Ionicons name="arrow-forward" size={20} color="#fff" />
+          )}
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -191,27 +210,27 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    position: 'relative',
+    position: "relative",
   },
   input: {
     flex: 1,
     paddingVertical: 8,
-    paddingRight: 56, 
+    paddingRight: 56,
     fontSize: 14,
     minHeight: 44,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   arrowButton: {
     backgroundColor: "#1A1A60",
     padding: 10,
     borderRadius: 20,
-    position: 'absolute',
+    position: "absolute",
     right: 8,
-    top: '50%',
+    top: "50%",
     transform: [{ translateY: -20 }],
     width: 40,
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

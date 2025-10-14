@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 const recentQuizzes = [
   {
     id: "1",

@@ -12,6 +12,8 @@ import HomeScreen from "./screens/HomeScreen";
 import CreateQuizScreen from "./screens/QuizScreen";
 import LeaderboardScreen from "./screens/LeaderboardScreen";
 import ProfileScreen from "./screens/ProfileScreen";
+import QuizPlayerScreen from "./screens/QuizPlayerScreen";
+
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -53,6 +55,7 @@ export default function App() {
 
         {/* Main app */}
         <Stack.Screen name="Dashboard" component={DashboardTabs} />
+        <Stack.Screen name="QuizPlayerScreen" component={QuizPlayerScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

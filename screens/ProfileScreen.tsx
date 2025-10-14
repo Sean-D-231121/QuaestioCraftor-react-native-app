@@ -22,16 +22,14 @@ function ProfileScreen({ navigation }: any) {
   const loadProfile = async () => {
     setLoading(true);
     try {
-      // Get current authenticated user (session)
       const sessionRes = await supabase.auth.getSession();
       const user = sessionRes?.data?.session?.user;
       if (!user?.id) {
         setLoading(false);
         return;
       }
+      console.log("Current user ID:", user.id);
 
-      // Fetch profile from users table. Use limit(1).maybeSingle() to avoid
-      // errors when multiple rows are present and to safely return null if none.
       const resp = await supabase
         .from("users")
         .select("id, username, avatar_url, points, email")
@@ -39,7 +37,7 @@ function ProfileScreen({ navigation }: any) {
         .limit(1)
         .maybeSingle();
 
-      
+      console.log(resp)
       if (resp.error) {
         console.log("Profile fetch response:", resp);
         console.error("Profile fetch error:", resp.error.message || resp.error);

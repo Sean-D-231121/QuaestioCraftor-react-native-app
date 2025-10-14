@@ -35,9 +35,9 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
-supabase.ts
-supabase.js
+
 src/lib/supabaseClient.js
+.env
 
 # generated native folders
 /ios
