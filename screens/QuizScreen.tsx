@@ -30,12 +30,14 @@ Ensure it is a valid JSON.`;
 
   if (!response.ok) {
     const errorData = await response.json();
+   
     throw new Error(errorData.detail);
   }
 
  
   
   const quiz = await response.json();
+   console.log("Generated Quiz:", quiz);
   return quiz;
 }
 

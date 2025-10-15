@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from "react-native";
 function QuizPlayerScreen({ route, navigation }: any) {
   const { quiz } = route.params;
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<any[]>([]);
   const [finished, setFinished] = useState(false);
+  const [shortAnswer, setShortanswer] = useState("");
 
   const question = quiz[current];
 
@@ -65,27 +66,50 @@ function QuizPlayerScreen({ route, navigation }: any) {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Question {current + 1}</Text>
       <Text style={styles.question}>{question.question}</Text>
-      {question.type === "MCQ" && question.options && (
+      {question.type === "MCQ" &&
+        question.options &&
         question.options.map((opt: string) => (
-          <TouchableOpacity key={opt} style={styles.button} onPress={() => handleAnswer(opt)}>
+          <TouchableOpacity
+            key={opt}
+            style={styles.button}
+            onPress={() => handleAnswer(opt)}
+          >
             <Text style={styles.buttonText}>{opt}</Text>
           </TouchableOpacity>
-        ))
-      )}
+        ))}
       {question.type === "True/False" && (
         <>
-          <TouchableOpacity style={styles.button} onPress={() => handleAnswer("True")}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => handleAnswer("True")}
+          >
             <Text style={styles.buttonText}>True</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => handleAnswer("False")}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => handleAnswer("False")}
+          >
             <Text style={styles.buttonText}>False</Text>
           </TouchableOpacity>
         </>
       )}
       {question.type === "Short answer" && (
-        <TouchableOpacity style={styles.button} onPress={() => handleAnswer("Answered")}>
-          <Text style={styles.buttonText}>Submit Answer</Text>
-        </TouchableOpacity>
+        <>
+          <TextInput
+            placeholder="you@example.com"
+            placeholderTextColor="#8a7fa8"
+            style={styles.input}
+            value={shortAnswer}
+            onChangeText={setShortanswer}
+            keyboardType="email-address"
+          ></TextInput>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => handleAnswer(shortAnswer)}
+          >
+            <Text style={styles.buttonText}>Submit Answer</Text>
+          </TouchableOpacity>
+        </>
       )}
     </ScrollView>
   );
@@ -94,13 +118,48 @@ function QuizPlayerScreen({ route, navigation }: any) {
 export default QuizPlayerScreen;
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, justifyContent: "center", alignItems: "center", padding: 20, backgroundColor: "#fff" },
-  title: { fontSize: 22, fontWeight: "700", marginBottom: 10, color: "#1A1A60" },
+  container: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginBottom: 10,
+    color: "#1A1A60",
+  },
   subtitle: { fontSize: 16, color: "#333", marginBottom: 20 },
   question: { fontSize: 18, marginBottom: 20, color: "#000" },
-  button: { backgroundColor: "#6C63FF", padding: 16, borderRadius: 12, marginVertical: 8, width: "100%", alignItems: "center" },
+  button: {
+    backgroundColor: "#6C63FF",
+    padding: 16,
+    borderRadius: 12,
+    marginVertical: 8,
+    width: "100%",
+    alignItems: "center",
+  },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
   wrongText: { color: "#B91C1C", fontSize: 14 },
   correctText: { color: "#047857", fontSize: 14 },
-  wrongCard: { backgroundColor: "#FEE2E2", borderRadius: 10, padding: 12, marginVertical: 6, width: "100%" },
+  wrongCard: {
+    backgroundColor: "#FEE2E2",
+    borderRadius: 10,
+    padding: 12,
+    marginVertical: 6,
+    width: "100%",
+  },
+  input: {
+    backgroundColor: "#EDE7F6",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 20,
+    fontSize: 16,
+    width: "100%",
+    height: 200,
+    color: "#1A1A60",
+  },
 });
