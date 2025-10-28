@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,15 +8,17 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Image,
 } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
 import { saveQuiz, saveQuestions } from "../services/Quizapi";
 import AsyncStorage from "@react-native-async-storage/async-storage"; 
+import { loadProfile } from "../services/ProfileService";
 
 
 async function generateQuiz({ quizType, difficulty, questionCount, topic } : any) {
-  const prompt = `Generate ${questionCount} ${difficulty} level ${quizType} quiz questions about ${topic} in JSON format.
+  const prompt = `Generate ${questionCount} ${difficulty} level can only be ${quizType} quiz questions about ${topic} in JSON format.
 The JSON should be an array of objects where each object has:
 - "question": the question text,
 - "options": an array of answer options (if quizType is "MCQ"; otherwise omit or leave empty),
@@ -45,16 +47,28 @@ const timeout = setTimeout(() => controller.abort(), 300000);
  
   
   const quiz = await response.json();
-   console.log("Generated Quiz:", quiz);
+  //  console.log("Generated Quiz:", quiz);
   return quiz;
 }
 
 function CreateQuizScreen({ navigation }: any) {
+  const [profile, setProfile] = useState<any>(null);
   const [quizType, setQuizType] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState<string | null>(null);
   const [questionCount, setQuestionCount] = useState(5);
   const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+      fetchProfile();
+    }, []);
+    
+      const fetchProfile = async () => {
+      setLoading(true);
+      const data = await loadProfile();
+      if (data) setProfile(data);
+      setLoading(false);
+    };
 
    const handleCreateQuiz = async () => {
      if (!quizType || !difficulty || !topic) {
@@ -65,9 +79,7 @@ function CreateQuizScreen({ navigation }: any) {
      setLoading(true);
 
      try {
-       const userData = await AsyncStorage.getItem("user");
-       const user = JSON.parse(userData || "{}");
-       const userId = user?.id || null;
+       const userId = profile?.id || null;
 
       
        const generatedQuiz = await generateQuiz({
@@ -85,7 +97,7 @@ function CreateQuizScreen({ navigation }: any) {
          difficulty,
          questionCount,
        });
-
+      //  gets questions ready for the quiz player screen
        const savedQuestions = await saveQuestions(quizId, generatedQuiz);
        navigation.navigate("QuizPlayerScreen", {
          quiz: savedQuestions,
@@ -103,10 +115,10 @@ function CreateQuizScreen({ navigation }: any) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        <View style={styles.avatar} />
+        <Image source={{ uri: profile?.avatar_url }} style={styles.avatar} />
         <View>
           <Text style={styles.welcome}>Welcome</Text>
-          <Text style={styles.username}>Hello Sean!</Text>
+          <Text style={styles.username}>Hello {profile?.username}!</Text>
         </View>
       </View>
 
@@ -145,10 +157,10 @@ function CreateQuizScreen({ navigation }: any) {
       <Slider
         style={{ width: "100%" }}
         minimumValue={5}
-        maximumValue={50}
+        maximumValue={15}
         step={1}
         minimumTrackTintColor="#6C63FF"
-        maximumTrackTintColor="#ddd"
+        maximumTrackTintColor="#ddd" 
         thumbTintColor="#6C63FF"
         value={questionCount}
         onValueChange={setQuestionCount}
@@ -201,7 +213,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#ccc",
     marginRight: 10,
   },
   welcome: {

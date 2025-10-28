@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from "react-native";
 import { saveSubmittedAnswers, startQuizAttempt, completeQuizAttempt } from "../services/QuizAttemptAPI";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { loadProfile } from "../services/ProfileService";
 function QuizPlayerScreen({ route, navigation }: any) {
   const { quiz, quizId } = route.params;
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (quiz && Array.isArray(quiz)) {
       const normalized = quiz.map((q: any, i: number) => {
@@ -27,7 +29,7 @@ function QuizPlayerScreen({ route, navigation }: any) {
         };
       });
 
-      console.log("Normalized quiz questions:", normalized);
+      // console.log("Normalized quiz questions:", normalized);
       quiz.splice(0, quiz.length, ...normalized); // replace original
     }
   }, [quiz]);
@@ -41,23 +43,23 @@ function QuizPlayerScreen({ route, navigation }: any) {
 
   const question = quiz[current];
 
-  // Ensure each question has a local ID
+  
   useEffect(() => {
-    quiz.forEach((q : any, i : any) => {
-      if (!q.question_id) q.question_id = `q-${i}-${Date.now()}`;
-      console.log("Question ID:", q.question_id);
-    });
-  }, []);
+        fetchProfile();
+      }, []);
+      
+const fetchProfile = async () => {
+  setLoading(true);
+  const data = await loadProfile();
+  if (data) {
+    setProfile(data);
+    const id = await startQuizAttempt(quizId, data.id);
+    setAttemptId(id);
+  }
+  setLoading(false);
+};
 
-  // Start quiz attempt
-  useEffect(() => {
-    (async () => {
-      const userData = await AsyncStorage.getItem("user");
-      const user = userData ? JSON.parse(userData) : null;
-      const id = await startQuizAttempt(quizId, user?.id ?? null); 
-      setAttemptId(id);
-    })();
-  }, []);
+  
 
 const handleAnswer = async (answer: string) => {
   const isCorrect =
@@ -84,8 +86,13 @@ const handleAnswer = async (answer: string) => {
 useEffect(() => {
   if (finished && attemptId) {
     const correctCount = answers.filter((a) => a.is_correct).length;
+    const totalQuestions = answers.length;
+
+    // Save answers
     saveSubmittedAnswers(attemptId, answers);
-    completeQuizAttempt(attemptId, correctCount);
+
+    // Update attempt with score and total
+    completeQuizAttempt(attemptId, correctCount, totalQuestions);
   }
 }, [finished]);
 

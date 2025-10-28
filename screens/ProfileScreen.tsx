@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,66 +9,31 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { supabase } from "../supabase";
+import { loadProfile, loadQuizStats } from "../services/ProfileService";
+import { loadUserQuizHistory } from "../services/Quizapi";
 
 function ProfileScreen({ navigation }: any) {
   const [profile, setProfile] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<"history" | "personal">("history");
   const [loading, setLoading] = useState(false);
-
+  const [stats, setStats] = useState({ totalQuizzes: 0, averagePercentage: 0 });
+  const [quizhistory, setQuizHistory] = useState<any[]>([]);
   useEffect(() => {
-    loadProfile();
+    fetchProfile();
   }, []);
 
-  const loadProfile = async () => {
-    setLoading(true);
-    try {
-      const sessionRes = await supabase.auth.getSession();
-      const user = sessionRes?.data?.session?.user;
-      if (!user?.id) {
-        setLoading(false);
-        return;
-      }
-      console.log("Current user ID:", user.id);
-
-      const resp = await supabase
-        .from("users")
-        .select("id, username, avatar_url, points, email")
-        .eq("id", user.id)
-        .limit(1)
-        .maybeSingle();
-
-      console.log(resp)
-      if (resp.error) {
-        console.log("Profile fetch response:", resp);
-        console.error("Profile fetch error:", resp.error.message || resp.error);
-      }
-
-      const data = resp.data;
-      console.log("Profile fetch response:", data);
-      
-      if (Array.isArray(data)) {
-        console.warn("Profile fetch returned an array, using first element.", data);
-        setProfile(data[0] || {
-          username: user.email?.split("@")[0] ?? "User",
-          points: 0,
-          email: user.email,
-        });
-      } else if (!data) {
-        
-        setProfile({
-          username: user.email?.split("@")[0] ?? "User",
-          points: 0,
-          email: user.email,
-        });
-      } else {
-        setProfile(data);
-      }
-    } catch (err) {
-      console.error("Unexpected profile load error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchProfile = async () => {
+  setLoading(true);
+  const data = await loadProfile();
+  if (data) {
+    setProfile(data);
+    const quizStats = await loadQuizStats(data.id); // 👈 use user id
+    const history = await loadUserQuizHistory(data.id); // 👈 load quiz history
+    setStats(quizStats);
+    setQuizHistory(history);
+  }
+  setLoading(false);
+};
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -80,15 +45,7 @@ function ProfileScreen({ navigation }: any) {
   };
 
   
-  const recentQuizzes = [
-    {
-      id: "q1",
-      title: "Understanding mitochondria test",
-      questions: 15,
-      score: "13/15",
-    },
-  ];
-
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Profile</Text>
@@ -111,7 +68,7 @@ function ProfileScreen({ navigation }: any) {
       <View style={styles.statsCard}>
         <View style={styles.statBlock}>
           <Text style={styles.statLabel}>quizzes{"\n"}Completed</Text>
-          <Text style={styles.statValue}>500</Text>
+          <Text style={styles.statValue}>{stats.totalQuizzes}</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statBlock}>
@@ -121,7 +78,7 @@ function ProfileScreen({ navigation }: any) {
         <View style={styles.statDivider} />
         <View style={styles.statBlock}>
           <Text style={styles.statLabel}>Percentage</Text>
-          <Text style={styles.statValue}>80%</Text>
+          <Text style={styles.statValue}>{stats.averagePercentage}%</Text>
         </View>
       </View>
 
@@ -162,15 +119,21 @@ function ProfileScreen({ navigation }: any) {
 
       {activeTab === "history" ? (
         <View style={{ width: "100%", paddingTop: 12 }}>
-          {recentQuizzes.map((q) => (
-            <View key={q.id} style={styles.quizCard}>
-              <Text style={styles.quizTitle}>{q.title}</Text>
-              <View style={styles.quizFooter}>
-                <Text style={styles.quizMeta}>Questions : {q.questions}</Text>
-                <Text style={styles.quizMeta}>Score : {q.score}</Text>
+          {quizhistory.length > 0 ? (
+            quizhistory.map((q) => (
+              <View key={q.id} style={styles.quizCard}>
+                <Text style={styles.quizTitle}>{q.title}</Text>
+                <View style={styles.quizFooter}>
+                  <Text style={styles.quizMeta}>Questions : {q.questions}</Text>
+                  <Text style={styles.quizMeta}>Score : {q.score}</Text>
+                </View>
               </View>
-            </View>
-          ))}
+              ))
+            ) : (
+            <Text style={{ textAlign: "center", marginTop: 20, color: "#1A1A60" }}>
+              No quiz history yet.
+              </Text>
+            )}
         </View>
       ) : (
         <View style={{ width: "100%", paddingTop: 12 }}>
