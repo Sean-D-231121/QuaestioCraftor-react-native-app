@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
+import { saveQuiz, saveQuestions } from "../services/Quizapi";
+import AsyncStorage from "@react-native-async-storage/async-storage"; 
 
 
 async function generateQuiz({ quizType, difficulty, questionCount, topic } : any) {
@@ -19,14 +21,17 @@ The JSON should be an array of objects where each object has:
 - "question": the question text,
 - "options": an array of answer options (if quizType is "MCQ"; otherwise omit or leave empty),
 - "answer": the correct answer.
--type": the type of question ("MCQ", "True/False", "Short answer").
+- "type": the type of question ("MCQ", "True/False", "Short answer").
 Ensure it is a valid JSON.`;
-
+const controller = new AbortController();
+const timeout = setTimeout(() => controller.abort(), 300000);
   const response = await fetch("http://192.168.0.116:8000/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ prompt, max_tokens: 2000 }),
+    signal: controller.signal,
   });
+  timeout
 
   if (!response.ok) {
     const errorData = await response.json();
@@ -48,25 +53,49 @@ function CreateQuizScreen({ navigation }: any) {
   const [topic, setTopic] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleCreateQuiz = async () => {
-    if (!quizType || !difficulty || !topic) {
-      Alert.alert("Please fill all fields");
-      return;
-    }
-    setLoading(true);
-    try {
-      const quiz = await generateQuiz({
-        quizType,
-        difficulty,
-        questionCount,
-        topic,
-      });
-      navigation.navigate("QuizPlayerScreen", { quiz });
-    } catch (error: any) {
-      Alert.alert("Failed to generate quiz", error.message);
-    }
-    setLoading(false);
-  };
+   const handleCreateQuiz = async () => {
+     if (!quizType || !difficulty || !topic) {
+       Alert.alert("Please fill all fields");
+       return;
+     }
+
+     setLoading(true);
+
+     try {
+       const userData = await AsyncStorage.getItem("user");
+       const user = JSON.parse(userData || "{}");
+       const userId = user?.id || null;
+
+      
+       const generatedQuiz = await generateQuiz({
+         quizType,
+         difficulty,
+         questionCount,
+         topic,
+       });
+
+       
+       const quizId = await saveQuiz({
+         userId,
+         topic,
+         quizType,
+         difficulty,
+         questionCount,
+       });
+
+       const savedQuestions = await saveQuestions(quizId, generatedQuiz);
+       navigation.navigate("QuizPlayerScreen", {
+         quiz: savedQuestions,
+         quizId,
+       });
+
+     } catch (error: any) {
+       console.error(" Quiz generation error:", error);
+       Alert.alert("Error", error.message || "Unknown error");
+     } finally {
+       setLoading(false);
+     }
+   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -80,7 +109,7 @@ function CreateQuizScreen({ navigation }: any) {
 
       {/* Quiz Type Buttons */}
       <View style={styles.buttonRow}>
-        {["MCQ", "True/False", "Short answer"].map((type) => (
+        {["MCQ", "True/False", "Mixed"].map((type) => (
           <TouchableOpacity
             key={type}
             style={[styles.typeButton, quizType === type && styles.activeButton]}

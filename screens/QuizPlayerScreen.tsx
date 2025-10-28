@@ -1,65 +1,112 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from "react-native";
+import { saveSubmittedAnswers, startQuizAttempt, completeQuizAttempt } from "../services/QuizAttemptAPI";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 function QuizPlayerScreen({ route, navigation }: any) {
-  const { quiz } = route.params;
+  const { quiz, quizId } = route.params;
+  useEffect(() => {
+    if (quiz && Array.isArray(quiz)) {
+      const normalized = quiz.map((q: any, i: number) => {
+        let parsedOptions = [];
+        try {
+          if (typeof q.options === "string" && q.options.trim() !== "") {
+            parsedOptions = JSON.parse(q.options);
+          } else if (Array.isArray(q.options)) {
+            parsedOptions = q.options;
+          }
+        } catch (e) {
+          console.warn("Failed to parse options for question:", q, e);
+        }
+
+        return {
+          question_id: q.question_id,
+          question: q.question || q.question_text,
+          answer: q.answer,
+          type: q.type,
+          options: parsedOptions, 
+        };
+      });
+
+      console.log("Normalized quiz questions:", normalized);
+      quiz.splice(0, quiz.length, ...normalized); // replace original
+    }
+  }, [quiz]);
+
+
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<any[]>([]);
   const [finished, setFinished] = useState(false);
   const [shortAnswer, setShortanswer] = useState("");
+  const [attemptId, setAttemptId] = useState<string | null>(null);
 
   const question = quiz[current];
 
-   const handleAnswer = (answer: string) => {
-    //  Store both user answer and correct answer
-    setAnswers([
-      ...answers,
-      { 
-        question: question.question, 
-        selected: answer, 
-        correct: question.answer 
-      },
-    ]);
+  // Ensure each question has a local ID
+  useEffect(() => {
+    quiz.forEach((q : any, i : any) => {
+      if (!q.question_id) q.question_id = `q-${i}-${Date.now()}`;
+      console.log("Question ID:", q.question_id);
+    });
+  }, []);
 
-    if (current + 1 < quiz.length) {
-      setCurrent(current + 1);
-    } else {
-      setFinished(true);
-    }
-  };
+  // Start quiz attempt
+  useEffect(() => {
+    (async () => {
+      const userData = await AsyncStorage.getItem("user");
+      const user = userData ? JSON.parse(userData) : null;
+      const id = await startQuizAttempt(quizId, user?.id ?? null); 
+      setAttemptId(id);
+    })();
+  }, []);
 
-  if (finished) {
-    // Separate correct and wrong answers
-    const wrongAnswers = answers.filter(a => a.selected !== a.correct);
-    const correctCount = answers.length - wrongAnswers.length;
+const handleAnswer = async (answer: string) => {
+  const isCorrect =
+    answer.trim().toLowerCase() === question.answer.trim().toLowerCase();
 
-    return (
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Quiz Finished!</Text>
-        <Text style={styles.subtitle}>
-          You got {correctCount} / {answers.length} correct.
-        </Text>
+  setAnswers([
+    ...answers,
+    {
+      question_id: question.question_id,
+      selected_answer: answer,
+      correct_answer: question.answer,
+      is_correct: isCorrect,
+    },
+  ]);
 
-        {wrongAnswers.length > 0 ? (
-          <>
-            <Text style={[styles.title, { marginTop: 20 }]}>Questions You Got Wrong:</Text>
-            {wrongAnswers.map((item, index) => (
-              <View key={index} style={styles.wrongCard}>
-                <Text style={styles.question}>{item.question}</Text>
-                <Text style={styles.wrongText}>Your Answer: {item.selected}</Text>
-                <Text style={styles.correctText}>Correct Answer: {item.correct}</Text>
-              </View>
-            ))}
-          </>
-        ) : (
-          <Text style={{ color: "green", marginVertical: 20 }}>Perfect Score! 🎉</Text>
-        )}
-
-        <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
-          <Text style={styles.buttonText}>Back to Home</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    );
+  if (current + 1 < quiz.length) {
+    setCurrent(current + 1);
+    setShortanswer("");
+  } else {
+    setFinished(true);
   }
+};
+
+useEffect(() => {
+  if (finished && attemptId) {
+    const correctCount = answers.filter((a) => a.is_correct).length;
+    saveSubmittedAnswers(attemptId, answers);
+    completeQuizAttempt(attemptId, correctCount);
+  }
+}, [finished]);
+
+if (finished) {
+  const correctCount = answers.filter((a) => a.is_correct).length;
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Quiz Finished!</Text>
+      <Text style={styles.subtitle}>
+        You got {correctCount} / {answers.length} correct.
+      </Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={styles.buttonText}>Back to Home</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+
 
 
   return (
@@ -67,7 +114,8 @@ function QuizPlayerScreen({ route, navigation }: any) {
       <Text style={styles.title}>Question {current + 1}</Text>
       <Text style={styles.question}>{question.question}</Text>
       {question.type === "MCQ" &&
-        question.options &&
+        Array.isArray(question.options) &&
+        question.options.length > 0 &&
         question.options.map((opt: string) => (
           <TouchableOpacity
             key={opt}
@@ -96,12 +144,11 @@ function QuizPlayerScreen({ route, navigation }: any) {
       {question.type === "Short answer" && (
         <>
           <TextInput
-            placeholder="you@example.com"
+            placeholder="Enter your answer"
             placeholderTextColor="#8a7fa8"
             style={styles.input}
             value={shortAnswer}
             onChangeText={setShortanswer}
-            keyboardType="email-address"
           ></TextInput>
           <TouchableOpacity
             style={styles.button}
