@@ -25,12 +25,15 @@ The JSON should be an array of objects where each object has:
 Ensure it is a valid JSON.`;
 const controller = new AbortController();
 const timeout = setTimeout(() => controller.abort(), 300000);
-  const response = await fetch("http://192.168.0.116:8000/generate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt, max_tokens: 2000 }),
-    signal: controller.signal,
-  });
+  const response = await fetch(
+    "https://quaestiocraftor-backend.onrender.com/generate",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, max_tokens: 2000 }),
+      signal: controller.signal,
+    }
+  );
   timeout
 
   if (!response.ok) {
