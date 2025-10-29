@@ -58,7 +58,7 @@ export async function saveQuestions(quizId: string, questions: any[]) {
     .select(); 
 
   if (error) throw error;
-  console.log("🟢 Saved questions:", data);
+  // console.log(" Saved questions:", data);
   return data;
 }
 

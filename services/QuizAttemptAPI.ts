@@ -23,7 +23,7 @@ export async function startQuizAttempt(quizId: string, userId: string | null) {
   return data.attempt_id;
 }
 
-export async function completeQuizAttempt(attemptId: string, score: number, total: number) {
+export async function completeQuizAttempt(attemptId: string, score: number, total: number, userId: string | null) {
   const { data, error } = await supabase
     .from("quiz_attempts")
     .update({
@@ -40,6 +40,25 @@ export async function completeQuizAttempt(attemptId: string, score: number, tota
   }
 
   console.log("Updated attempt:", data);
+    if (userId) {
+    const { data: userData, error: fetchError } = await supabase
+      .from("users")
+      .select("points")
+      .eq("id", userId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    const newPoints = (userData?.points || 0) + score;
+
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ points: newPoints })
+      .eq("id", userId);
+
+    if (updateError) throw updateError;
+  
+  }
 }
 
 
@@ -66,45 +85,51 @@ export async function saveSubmittedAnswers(
 
 
 export async function fetchLeaderboard(filter: "Today" | "Weekly" | "All time") {
-  let fromDate: string | null = null;
+ const now = new Date();
+let fromDate: Date;
 
-  const now = new Date();
+if (filter === "Today") {
+  fromDate = new Date(now);
+  fromDate.setHours(0, 0, 0, 0); // start of today
+} else if (filter === "Weekly") {
+  const day = now.getDay(); // Sunday = 0
+  fromDate = new Date(now);
+  fromDate.setDate(now.getDate() - (day === 0 ? 6 : day - 1)); // Monday
+  fromDate.setHours(0, 0, 0, 0); // start of Monday
+} else {
+  fromDate = new Date("1970-01-01");
+}
 
-  if (filter === "Today") {
-    fromDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
-  } else if (filter === "Weekly") {
-    const day = now.getDay();
-    const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday
-    const monday = new Date(now.setDate(diff));
-    fromDate = monday.toISOString().split("T")[0];
-  }
 
-  // Fetch quiz_attempts joined with users
-  const { data, error } = await supabase
-    .from("quiz_attempts")
-    .select(`
-      score,
-      user_id,
-      users!inner(id, username, avatar_url)
-    `)
-    .gte(fromDate ? "created_at" : "created_at", fromDate || "1970-01-01");
-
-  if (error) throw error;
+const { data, error } = await supabase
+  .from("quiz_attempts")
+  .select(`
+    score,
+    user_id,
+    users!inner(id, username, avatar_url)
+  `)
+  .gte("created_at", fromDate.toISOString());
+ 
 
   // Aggregate points per user
-  const pointsMap: Record<string, { username: string; avatar_url: string | null; points: number }> = {};
-  data?.forEach((row: any) => {
-    const username = row.users?.username ?? "Unknown";
-    const avatar_url = row.users?.avatar_url ?? null;
+const pointsMap: Record<string, { username: string; avatar_url: string | null; points: number }> = {};
+data?.forEach((row: any) => {
+  const username = row.users?.username ?? "Unknown";
+  const avatar_url = row.users?.avatar_url ?? null;
 
-    if (!pointsMap[row.user_id]) pointsMap[row.user_id] = { username, avatar_url, points: 0 };
-    pointsMap[row.user_id].points += row.score ?? 0;
-  });
+  if (!pointsMap[row.user_id]) pointsMap[row.user_id] = { username, avatar_url, points: 0 };
+  pointsMap[row.user_id].points += row.score ?? 0;
+});
 
-  // Convert to array, sort by points descending
-  return Object.values(pointsMap)
-    .sort((a, b) => b.points - a.points)
-    .map((u, idx) => ({ ...u, rank: idx + 1 }));
+return Object.entries(pointsMap)
+  .map(([user_id, value], idx) => ({
+    id: user_id,         // needed for rendering
+    username: value.username,
+    avatar_url: value.avatar_url,
+    points: value.points,
+    rank: idx + 1,
+  }))
+  .sort((a, b) => b.points - a.points);
 }
 
 

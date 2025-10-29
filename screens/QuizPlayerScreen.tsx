@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from "react-native";
 import { saveSubmittedAnswers, startQuizAttempt, completeQuizAttempt } from "../services/QuizAttemptAPI";
 import { loadProfile } from "../services/ProfileService";
@@ -28,8 +28,6 @@ function QuizPlayerScreen({ route, navigation }: any) {
           options: parsedOptions, 
         };
       });
-
-      // console.log("Normalized quiz questions:", normalized);
       quiz.splice(0, quiz.length, ...normalized); // replace original
     }
   }, [quiz]);
@@ -84,7 +82,7 @@ const handleAnswer = async (answer: string) => {
 };
 
 useEffect(() => {
-  if (finished && attemptId) {
+  if (finished && attemptId && profile?.id) {
     const correctCount = answers.filter((a) => a.is_correct).length;
     const totalQuestions = answers.length;
 
@@ -92,7 +90,7 @@ useEffect(() => {
     saveSubmittedAnswers(attemptId, answers);
 
     // Update attempt with score and total
-    completeQuizAttempt(attemptId, correctCount, totalQuestions);
+    completeQuizAttempt(attemptId, correctCount, totalQuestions, profile.id)
   }
 }, [finished]);
 

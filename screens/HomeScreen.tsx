@@ -21,31 +21,43 @@ function HomeScreen({ navigation }: any) {
   const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    loadRecentQuizzes();
-  }, []);
-  useEffect(() => {
-        fetchProfile();
-      }, []);
-      
-        const fetchProfile = async () => {
-        setLoading(true);
-        const data = await loadProfile();
-        if (data) setProfile(data);
-        setLoading(false);
-      };
-  
+  // Load immediately
+  loadRecentQuizzes();
+  fetchProfile();
 
-  const loadRecentQuizzes = async () => {
+  // Refresh every 10 seconds
+  const interval = setInterval(() => {
+    loadRecentQuizzes();
+    fetchProfile();
+  }, 10000);
+
+  // Cleanup interval on unmount
+  return () => clearInterval(interval);
+}, []);
+
+const fetchProfile = async () => {
+  try {
     setLoading(true);
-    try{
-      const data = await fetchRecentQuizzes();
-      setRecentQuizzes(data);
-    }catch(error){
-      console.error("Error fetching recent quizzes:", error);
-    }finally{
-      setLoading(false);
-    }
+    const data = await loadProfile();
+    if (data) setProfile(data);
+  } catch (error) {
+    console.error("Error loading profile:", error);
+  } finally {
+    setLoading(false);
   }
+};
+
+const loadRecentQuizzes = async () => {
+  try {
+    setLoading(true);
+    const data = await fetchRecentQuizzes();
+    if (data) setRecentQuizzes(data);
+  } catch (error) {
+    console.error("Error fetching recent quizzes:", error);
+  } finally {
+    setLoading(false);
+  }
+  };
 
   const handlePlayQuiz = async (quiz : any) => {
     try {

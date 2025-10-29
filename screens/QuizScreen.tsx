@@ -13,12 +13,11 @@ import {
 import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
 import { saveQuiz, saveQuestions } from "../services/Quizapi";
-import AsyncStorage from "@react-native-async-storage/async-storage"; 
 import { loadProfile } from "../services/ProfileService";
 
 
 async function generateQuiz({ quizType, difficulty, questionCount, topic } : any) {
-  const prompt = `Generate ${questionCount} ${difficulty} level can only be ${quizType} quiz questions about ${topic} in JSON format.
+  const prompt = `Generate ${questionCount} ${difficulty} level can only be ${quizType} quiz questions about ${topic} in JSON format and the answers need be a bit more random.
 The JSON should be an array of objects where each object has:
 - "question": the question text,
 - "options": an array of answer options (if quizType is "MCQ"; otherwise omit or leave empty),
@@ -79,6 +78,7 @@ function CreateQuizScreen({ navigation }: any) {
      setLoading(true);
 
      try {
+      
        const userId = profile?.id || null;
 
       
@@ -103,6 +103,8 @@ function CreateQuizScreen({ navigation }: any) {
          quiz: savedQuestions,
          quizId,
        });
+       setTopic("");
+
 
      } catch (error: any) {
        console.error(" Quiz generation error:", error);
@@ -166,12 +168,12 @@ function CreateQuizScreen({ navigation }: any) {
         onValueChange={setQuestionCount}
       />
 
-      {/* File Upload Placeholder */}
+      {/* File Upload Placeholder
       <View style={styles.uploadBox}>
         <Text style={styles.uploadText}>
           Drag and drop file(.jpeg, .png, .pdf)
         </Text>
-      </View>
+      </View> */}
 
       {/* Input for topic */}
       <View style={styles.inputContainer}>

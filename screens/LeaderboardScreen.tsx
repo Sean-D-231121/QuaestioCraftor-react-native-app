@@ -19,9 +19,18 @@ export default function LeaderboardScreen({ navigation }: any) {
 }, [filter]);
 
 
-  // Top 3 for podium
-  const topThree = leaderboard.slice(0, 3);
-  const rest = leaderboard.slice(3);
+
+
+  const sortedLeaderboard = [...leaderboard].sort((a, b) => a.rank - b.rank);
+  const topThree = sortedLeaderboard.slice(0, 3);
+  
+  const podiumOrder = [
+  topThree.find(u => u.rank === 2) || topThree[1], 
+  topThree.find(u => u.rank === 1) || topThree[0],
+  topThree.find(u => u.rank === 3) || topThree[2],
+].filter(Boolean);
+  const rest = sortedLeaderboard.slice(3,9);
+  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -43,29 +52,34 @@ export default function LeaderboardScreen({ navigation }: any) {
       </View>
 
       <View style={styles.podiumRow}>
-        {topThree.map((user, idx) => {
-          const isCenter = idx === 0; // podium center is top
-          return (
-            <View
-              key={user.id || idx}
-              style={isCenter ? styles.podiumItemCenter : styles.podiumItem}
-            >
-              <Image
-                source={{ uri: user.avatar_url }}
-                style={[styles.circle, isCenter ? styles.centerCircle : styles.smallCircle]}
-              />
-              <View
-                style={[
-                  styles.badge,
-                  idx === 0 ? styles.badgeCenter : idx === 1 ? styles.badgeLeft : styles.badgeRight,
-                ]}
-              >
-                <Text style={styles.badgeText}>{idx + 1}</Text>
-              </View>
-            </View>
-          );
-        })}
+  {podiumOrder.map((user) => {
+    let style, circleStyle, badgeStyle;
+
+    if (user.rank === 1) { // 1st place
+      style = styles.podiumItemCenter;
+      circleStyle = styles.centerCircle;
+      badgeStyle = styles.badgeCenter;
+    } else if (user.rank === 2) { // 2nd place
+      style = styles.podiumItemLeft;
+      circleStyle = styles.smallCircle;
+      badgeStyle = styles.badgeLeft;
+    } else { // 3rd place
+      style = styles.podiumItemRight;
+      circleStyle = styles.smallCircle;
+      badgeStyle = styles.badgeRight;
+    }
+
+    return (
+      <View key={user.id} style={style}>
+        <Image source={{ uri: user.avatar_url }} style={[styles.circle, circleStyle]} />
+        <View style={[styles.badge, badgeStyle]}>
+          <Text style={styles.badgeText}>{user.rank}</Text>
+        </View>
       </View>
+    );
+  })}
+</View>
+
 
       <View style={styles.listContainer}>
         {rest.map((r, index) => (
@@ -110,4 +124,6 @@ const styles = StyleSheet.create({
   rankNumber: { fontSize: 18, fontWeight: "700", color: "#1A1A60", marginRight: 12 },
   rankPoints: { fontSize: 18, fontWeight: "800", color: "#1A1A60" },
   avatarSmall: { width: 32, height: 32, borderRadius: 16, marginRight: 8 },
+  podiumItemLeft: { alignItems: "center", width: 120, marginBottom: 10 },
+  podiumItemRight: { alignItems: "center", width: 120, marginBottom: 10 },
 });
