@@ -15,6 +15,7 @@ export default function LeaderboardScreen({ navigation }: any) {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
 
  useEffect(() => {
+  setLeaderboard([]); // Clear current leaderboard while loading new data
   fetchLeaderboard(filter).then(setLeaderboard).catch(console.error);
 }, [filter]);
 

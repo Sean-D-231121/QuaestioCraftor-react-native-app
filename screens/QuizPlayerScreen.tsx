@@ -102,6 +102,28 @@ if (finished) {
       <Text style={styles.subtitle}>
         You got {correctCount} / {answers.length} correct.
       </Text>
+
+      {answers.map((a, idx) => (
+        <View
+          key={idx}
+          style={[styles.wrongCard, { backgroundColor: a.is_correct ? "#DCFCE7" : "#FEE2E2" }]}
+        >
+          <Text style={styles.question}>
+            {quiz[idx]?.question || `Question ${idx + 1}`}
+          </Text>
+          <Text
+            style={a.is_correct ? styles.correctText : styles.wrongText}
+          >
+            Your answer: {a.selected_answer}
+          </Text>
+          {!a.is_correct && (
+            <Text style={styles.correctText}>
+              Correct answer: {a.correct_answer}
+            </Text>
+          )}
+        </View>
+      ))}
+
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.goBack()}

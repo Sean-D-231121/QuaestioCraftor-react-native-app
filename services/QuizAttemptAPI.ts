@@ -85,51 +85,64 @@ export async function saveSubmittedAnswers(
 
 
 export async function fetchLeaderboard(filter: "Today" | "Weekly" | "All time") {
- const now = new Date();
-let fromDate: Date;
+  const now = new Date();
+  let fromDate: Date;
 
-if (filter === "Today") {
-  fromDate = new Date(now);
-  fromDate.setHours(0, 0, 0, 0); // start of today
-} else if (filter === "Weekly") {
-  const day = now.getDay(); // Sunday = 0
-  fromDate = new Date(now);
-  fromDate.setDate(now.getDate() - (day === 0 ? 6 : day - 1)); // Monday
-  fromDate.setHours(0, 0, 0, 0); // start of Monday
-} else {
-  fromDate = new Date("1970-01-01");
-}
+  if (filter === "Today") {
+    fromDate = new Date(now);
+    fromDate.setHours(0, 0, 0, 0); // start of today
+  } else if (filter === "Weekly") {
+    const day = now.getDay(); // Sunday = 0
+    fromDate = new Date(now);
+    fromDate.setDate(now.getDate() - (day === 0 ? 6 : day - 1)); // start of Monday
+    fromDate.setHours(0, 0, 0, 0);
+  } else {
+    fromDate = new Date("1970-01-01");
+  }
 
+  const { data, error } = await supabase
+    .from("quiz_attempts")
+    .select(`
+      score,
+      user_id,
+      users!inner(id, username, avatar_url)
+    `)
+    .gte("created_at", fromDate.toISOString());
 
-const { data, error } = await supabase
-  .from("quiz_attempts")
-  .select(`
-    score,
-    user_id,
-    users!inner(id, username, avatar_url)
-  `)
-  .gte("created_at", fromDate.toISOString());
- 
+  if (error) {
+    console.error("Error fetching leaderboard:", error.message);
+    return [];
+  }
 
-  // Aggregate points per user
-const pointsMap: Record<string, { username: string; avatar_url: string | null; points: number }> = {};
-data?.forEach((row: any) => {
-  const username = row.users?.username ?? "Unknown";
-  const avatar_url = row.users?.avatar_url ?? null;
+  
+  const pointsMap: Record<
+    string,
+    { username: string; avatar_url: string | null; points: number }
+  > = {};
+  data?.forEach((row: any) => {
+    const username = row.users?.username ?? "Unknown";
+    const avatar_url = row.users?.avatar_url ?? null;
 
-  if (!pointsMap[row.user_id]) pointsMap[row.user_id] = { username, avatar_url, points: 0 };
-  pointsMap[row.user_id].points += row.score ?? 0;
-});
+    if (!pointsMap[row.user_id])
+      pointsMap[row.user_id] = { username, avatar_url, points: 0 };
+    pointsMap[row.user_id].points += row.score ?? 0;
+  });
 
-return Object.entries(pointsMap)
-  .map(([user_id, value], idx) => ({
-    id: user_id,         // needed for rendering
-    username: value.username,
-    avatar_url: value.avatar_url,
-    points: value.points,
+  // Convert to array and sort by points descending
+  const leaderboard = Object.entries(pointsMap)
+    .map(([user_id, value]) => ({
+      id: user_id,
+      username: value.username,
+      avatar_url: value.avatar_url,
+      points: value.points,
+    }))
+    .sort((a, b) => b.points - a.points); // sort first
+
+  // Assign rank after sorting
+  return leaderboard.map((user, idx) => ({
+    ...user,
     rank: idx + 1,
-  }))
-  .sort((a, b) => b.points - a.points);
+  }));
 }
 
 
