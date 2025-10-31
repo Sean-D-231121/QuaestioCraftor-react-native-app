@@ -50,7 +50,6 @@ function SignUpScreen({ navigation }: any) {
       Alert.alert("Sign up failed", error.message || "Something went wrong.");
     } else {
       Alert.alert("Success", "Account created successfully!");
-      navigation.replace("Dashboard");
     }
   };
 

@@ -1,10 +1,10 @@
 // App.js
-import React from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-
+import { supabase } from "./supabase";
 // Screens
 import SignInScreen from "./screens/SignInScreen";
 import SignUpScreen from "./screens/SignUpScreen";
@@ -13,7 +13,6 @@ import CreateQuizScreen from "./screens/QuizScreen";
 import LeaderboardScreen from "./screens/LeaderboardScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import QuizPlayerScreen from "./screens/QuizPlayerScreen";
-
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -28,7 +27,7 @@ function DashboardTabs() {
           else if (route.name === "CreateQuiz") iconName = "add-circle";
           else if (route.name === "Leaderboard") iconName = "trophy";
           else if (route.name === "Profile") iconName = "person";
-          else iconName = "ellipse"; // fallback icon
+          else iconName = "ellipse"; // fallback
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
@@ -45,17 +44,58 @@ function DashboardTabs() {
   );
 }
 
+
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  
+
+  useEffect(() => {
+  let mounted = true;
+
+  const init = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('auth init session', session);
+      if (!mounted) return;
+      setIsAuthenticated(!!session);
+    } catch (err) {
+      console.error('getSession error', err);
+      if (!mounted) return;
+      setIsAuthenticated(false);
+    }
+  };
+
+  init();
+
+  const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+
+    if (!mounted) return;
+    setIsAuthenticated(!!session);
+  });
+
+  return () => {
+    mounted = false;
+    listener.subscription.unsubscribe();
+  };
+}, []);
+
+  // Show nothing while checking auth
+  if (isAuthenticated === null) return null;
+
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {/* Auth flow */}
-        <Stack.Screen name="SignIn" component={SignInScreen} />
-        <Stack.Screen name="SignUp" component={SignUpScreen} />
-
-        {/* Main app */}
-        <Stack.Screen name="Dashboard" component={DashboardTabs} />
-        <Stack.Screen name="QuizPlayerScreen" component={QuizPlayerScreen} />
+        {isAuthenticated ? (
+          <>
+            <Stack.Screen name="HomeScreen" component={DashboardTabs} />
+            <Stack.Screen name="QuizPlayerScreen" component={QuizPlayerScreen} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="SignIn" component={SignInScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

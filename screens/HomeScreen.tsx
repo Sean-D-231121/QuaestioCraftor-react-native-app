@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import Quiz, { fetchRecentQuizzes, fetchQuizQuestions } from "../services/Quizapi";
 import { loadProfile } from "../services/ProfileService";
+import { supabase } from "../supabase";
 
 
 
@@ -19,6 +20,7 @@ function HomeScreen({ navigation }: any) {
   const [recentQuizzes, setRecentQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+
 
   useEffect(() => {
   // Load immediately

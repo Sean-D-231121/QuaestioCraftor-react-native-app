@@ -6,7 +6,9 @@ export const getAuthSignIn = async (email: string, password: string) => {
     email,
     password,
   });
-
+console.log('signInWithPassword -> data:',data,'error:',error);
+const { data: sessionData } = await supabase.auth.getSession();
+console.log('getSession right after signIn:', sessionData);
   if (error) {
     console.error("Sign-in error:", error.message);
     return { error };
@@ -68,6 +70,7 @@ export const getAuthSignUp = async (
         email,
         points: 0,
         avatar_url: avatarUrl,
+        auth_id: user?.id  
       },
     ]);
 

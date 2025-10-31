@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { supabase } from "../supabase";
-import { loadProfile, loadQuizStats } from "../services/ProfileService";
+import { loadProfile, loadQuizStats, updateAvatar } from "../services/ProfileService";
 import { loadUserQuizHistory } from "../services/Quizapi";
 
 function ProfileScreen({ navigation }: any) {
@@ -35,8 +35,8 @@ function ProfileScreen({ navigation }: any) {
   const data = await loadProfile();
   if (data) {
     setProfile(data);
-    const quizStats = await loadQuizStats(data.id); // 👈 use user id
-    const history = await loadUserQuizHistory(data.id); // 👈 load quiz history
+    const quizStats = await loadQuizStats(data.id); // use user id
+    const history = await loadUserQuizHistory(data.id); // load quiz history
     setStats(quizStats);
     setQuizHistory(history);
   }
@@ -55,29 +55,12 @@ function ProfileScreen({ navigation }: any) {
   
 const handleChangeAvatar = async () => {
   try {
-    // Verify the user is authenticated
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      Alert.alert("Not signed in", "Please sign in again.");
-      navigation.replace("SignIn");
-      return;
-    }
-
-    // Now user.id is available for auth.uid() RLS
-    console.log("Authenticated user:", user.id);
-
-    // Ask for permission
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert("Permission required", "Please allow access to your photos.");
       return;
     }
 
-    // Pick image
     const pickerResult = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
@@ -88,43 +71,15 @@ const handleChangeAvatar = async () => {
     if (pickerResult.canceled || !pickerResult.assets?.length) return;
 
     const uri = pickerResult.assets[0].uri;
-    const fileExt = uri.split(".").pop() || "jpg";
-    const fileName = `${user.id}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
-
-    // Convert to bytes
-    const response = await fetch(uri);
-    const arrayBuffer = await response.arrayBuffer();
-    const file = new Uint8Array(arrayBuffer);
-
-    // Upload image to storage
-    const { error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(fileName, file, { upsert: true, contentType: "image/jpeg" });
-
-    if (uploadError) throw uploadError;
-
-    // Get public URL
-    const { data: publicData } = supabase.storage
-      .from("avatars")
-      .getPublicUrl(fileName);
-    const publicUrl = publicData.publicUrl;
-
-    // Update user profile (make sure you're updating the correct table)
-    const { error: updateError } = await supabase
-      .from("users") 
-      .update({ avatar_url: publicUrl })
-      .eq("id", user.id);
-
-    if (updateError) throw updateError;
+    const publicUrl = await updateAvatar(uri);
 
     setProfile({ ...profile, avatar_url: publicUrl });
     Alert.alert("Success", "Profile picture updated!");
   } catch (error: any) {
-    console.error("Avatar update error:", error.message);
     Alert.alert("Error", error.message || "Failed to update avatar.");
   }
 };
+
 
 
   

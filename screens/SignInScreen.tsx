@@ -29,8 +29,6 @@ function SignInScreen({ navigation }: any) {
 
     if (error) {
       Alert.alert("Sign In Error", error.message);
-    } else {
-      navigation.replace("Dashboard");
     }
   };
 

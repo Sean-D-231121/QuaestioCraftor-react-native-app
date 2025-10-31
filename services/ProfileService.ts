@@ -20,7 +20,7 @@ export const loadProfile = async () => {
     }
 
     const data = resp.data;
-
+    
     if (Array.isArray(data)) {
       console.warn("Profile fetch returned an array, using first element.", data);
       return (
@@ -68,4 +68,44 @@ export const loadQuizStats = async (userId :any) => {
     totalQuizzes,
     averagePercentage: Math.round(averagePercentage),
   };
+};
+export const updateAvatar = async (fileUri: string) => {
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) throw sessionError;
+  if (!session || !session.user?.id) throw new Error('User not signed in');
+
+  const userId = session.user.id;
+
+  const fileExt = fileUri.split('.').pop() || 'jpg';
+  const fileName = `${userId}.${fileExt}`;
+
+  // Fetch image
+  const resp = await fetch(fileUri);
+  if (!resp.ok) throw new Error('Failed to fetch image');
+
+  const contentType = resp.headers.get('content-type') || `image/${fileExt}`;
+  const arrayBuffer = await resp.arrayBuffer();
+  const file = new Uint8Array(arrayBuffer);
+
+  // Upload to Supabase Storage
+  const { error: uploadError } = await supabase.storage
+    .from('avatars')
+    .upload(fileName, file, { upsert: true, contentType });
+
+  if (uploadError) throw uploadError;
+
+  // Get public URL
+  const { data: publicData } = supabase.storage.from('avatars').getPublicUrl(fileName);
+  const publicUrl = publicData.publicUrl;
+
+  // Update user table
+  const { data: updated, error: updateError } = await supabase
+    .from('users')
+    .update({ avatar_url: publicUrl })
+    .eq('auth_id', userId)
+    .select();
+
+  if (updateError) throw updateError;
+
+  return publicUrl;
 };
