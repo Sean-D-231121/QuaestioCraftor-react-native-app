@@ -99,9 +99,6 @@ const handleChangeAvatar = async () => {
 
         <View style={styles.usernameRow}>
           <Text style={styles.username}>{profile?.username ?? "User"}</Text>
-          <TouchableOpacity onPress={handleEdit} style={styles.editButton}>
-            <Text style={styles.editIcon}>✎</Text>
-          </TouchableOpacity>
         </View>
       </View>
       <View style={styles.statsCard}>
@@ -178,12 +175,20 @@ const handleChangeAvatar = async () => {
           )}
         </View>
       ) : (
+        <>
+        <Card style={{ width: "100%", marginTop: 16 }}>
+          <Card.Content>
+            <Text variant="bodyMedium">Username</Text>
+            <Text variant="titleSmall">{profile?.username ?? "—"}</Text>
+          </Card.Content>
+        </Card>
         <Card style={{ width: "100%", marginTop: 16 }}>
           <Card.Content>
             <Text variant="bodyMedium">Email</Text>
             <Text variant="titleSmall">{profile?.email ?? "—"}</Text>
           </Card.Content>
         </Card>
+        </>
       )}
 
 

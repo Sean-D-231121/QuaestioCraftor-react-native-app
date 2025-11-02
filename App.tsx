@@ -15,7 +15,9 @@ import CreateQuizScreen from "./screens/QuizScreen";
 import LeaderboardScreen from "./screens/LeaderboardScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import QuizPlayerScreen from "./screens/QuizPlayerScreen";
+import SplashScreen from "./screens/splashscreen";
 
+// Navigation Stacks
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -106,21 +108,26 @@ function DashboardTabs() {
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  
+  const [showSplash, setShowSplash] = useState(true);
+
+  const minSplashTime = new Promise((resolve) => setTimeout(resolve, 5000));
 
   useEffect(() => {
   let mounted = true;
 
   const init = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const sessionPromise = supabase.auth.getSession();
+        const [{ data: { session } }] = await Promise.all([sessionPromise, minSplashTime]);
       if (!mounted) return;
       setIsAuthenticated(!!session);
     } catch (err) {
       console.error('getSession error', err);
       if (!mounted) return;
       setIsAuthenticated(false);
-    }
+    }finally {
+        if (mounted) setShowSplash(false);
+      }
   };
 
   init();
@@ -138,7 +145,7 @@ export default function App() {
 }, []);
 
   // Show nothing while checking auth
-  if (isAuthenticated === null) return null;
+   if (showSplash || isAuthenticated === null) return <SplashScreen />;
 
   return (
     <PaperProvider theme={theme}>

@@ -31,9 +31,9 @@ export default function LeaderboardScreen({ navigation }: any) {
 
   // Fill podium placeholders
   const podiumOrder = [
-    topThree.find(u => u.rank === 2) || { id: "vacant-2", username: "Vacant", avatar_url: "", rank: 2 },
-    topThree.find(u => u.rank === 1) || { id: "vacant-1", username: "Vacant", avatar_url: "", rank: 1 },
-    topThree.find(u => u.rank === 3) || { id: "vacant-3", username: "Vacant", avatar_url: "", rank: 3 },
+    topThree.find(u => u.rank === 2) || { id: "vacant-2", username: "No ranked player yet", avatar_url: "", rank: 2 },
+    topThree.find(u => u.rank === 1) || { id: "vacant-1", username: "No ranked player yet", avatar_url: "", rank: 1 },
+    topThree.find(u => u.rank === 3) || { id: "vacant-3", username: "No ranked player yet", avatar_url: "", rank: 3 },
   ];
 
   
@@ -41,7 +41,7 @@ export default function LeaderboardScreen({ navigation }: any) {
   while (rest.length < 6) {
     rest.push({
       id: `vacant-${rest.length + 4}`,
-      username: "Up for Grabs",
+      username: "No ranked player yet",
       avatar_url: "",
       points: 0,
     });
