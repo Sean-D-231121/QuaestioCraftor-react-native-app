@@ -16,37 +16,40 @@ import { loadProfile } from "../services/ProfileService";
 
 
 
-async function generateQuiz({ quizType, difficulty, questionCount, topic } : any) {
-  const prompt = `Generate ${questionCount} ${difficulty} level can only be ${quizType} quiz questions about ${topic} in JSON format and the answers need be a bit more random.
-The JSON should be an array of objects where each object has:
-- "question": the question text,
-- "options": an array of answer options (if quizType is "MCQ"; otherwise omit or leave empty),
-- "answer": the correct answer.
-- "type": the type of question ("MCQ", "True/False", "Short answer").
-Ensure it is a valid JSON.`;
-const controller = new AbortController();
-const timeout = setTimeout(() => controller.abort(), 300000);
-  const response = await fetch(
-    "https://quaestiocraftor-backend.onrender.com/generate",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt, max_tokens: 2000 }),
-      signal: controller.signal,
+async function generateQuiz({ quizType, difficulty, questionCount, topic }: any) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60000);
+
+  try {
+    const response = await fetch(
+      "http://192.168.0.116:8000/generate",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          quiz_type: quizType,
+          difficulty,
+          question_count: questionCount,
+          topic,
+        }),
+        signal: controller.signal,
+      }
+    );
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || "Failed to generate quiz");
     }
-  );
-  timeout
 
-  if (!response.ok) {
-    const errorData = await response.json();
-   
-    throw new Error(errorData.detail);
+    const data = await response.json();
+    return data.quiz;
+
+  } catch (error) {
+    console.error("Error generating quiz:", error);
+    throw error;
   }
-
- 
-  
-  const quiz = await response.json();
-  return quiz;
 }
 
 function CreateQuizScreen({ navigation }: any) {
