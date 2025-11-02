@@ -6,9 +6,10 @@ import {
   ScrollView,
   Alert,
   Image,
-  KeyboardAvoidingView 
+  KeyboardAvoidingView, 
+  Platform
 } from "react-native";
-import { Text, TextInput, ActivityIndicator, Button } from "react-native-paper";
+import { Text, TextInput, ActivityIndicator, Button, Avatar } from "react-native-paper";
 import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
 import { saveQuiz, saveQuestions } from "../services/Quizapi";
@@ -125,15 +126,10 @@ function CreateQuizScreen({ navigation }: any) {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <Image source={{ uri: profile?.avatar_url }} style={styles.avatar} />
-        <View>
-          <Text style={styles.welcome}>Welcome</Text>
-          <Text style={styles.username}>Hello {profile?.username}!</Text>
-        </View>
-      </View>
+      <Text style={styles.title}>Create a Quiz</Text>
 
       {/* Quiz Type Buttons */}
+      <Text variant= "titleLarge" style={styles.quizselectionheading}>Choose Question Type :</Text>
       <View style={styles.buttonRow}>
         {["MCQ", "True/False", "Mixed"].map((type) => (
           <TouchableOpacity
@@ -149,6 +145,7 @@ function CreateQuizScreen({ navigation }: any) {
       </View>
 
       {/* Difficulty Buttons */}
+      <Text  variant= "titleLarge" style={styles.quizselectionheading}>Choose Difficulty :</Text>
       <View style={styles.buttonRow}>
         {["Easy", "Medium", "Hard"].map((level) => (
           <TouchableOpacity
@@ -215,29 +212,31 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 25,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  welcome: {
-    fontSize: 14,
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 25,
+      paddingTop: Platform.OS === "ios" ? 40 : 10, // helps on iOS
+      paddingHorizontal: 4,
+      borderRadius: 12,
+    },
+  title: {
+    fontSize: 24,
+    fontWeight: "700",
+    textAlign: "center",
     color: "#1A1A60",
-  },
-  username: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#1A1A60",
+    marginTop: Platform.OS === "ios" ? 40 : 10,
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 15,
+  },
+  quizselectionheading:{
+    marginLeft: "2%",
+    marginBottom: 15,
+    marginTop: 8,
+    fontWeight: 'bold',
+     color: "#1A1A60",
   },
   typeButton: {
     flex: 1,
@@ -264,7 +263,21 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#1A1A60",
   },
- 
-  
+  headerTextContainer: {
+    marginLeft: 12,
+    flexShrink: 1,
+  },
+
+  welcomeText: {
+    color: "#6C63FF",
+    fontWeight: "600",
+    letterSpacing: 0.3,
+  },
+
+  usernameText: {
+    color: "#1A1A60",
+    fontWeight: "700",
+    fontSize: 18,
+  },
   
 });

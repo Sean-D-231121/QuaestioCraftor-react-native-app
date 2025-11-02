@@ -3,13 +3,14 @@ import React, { useState } from "react";
 import { ScrollView, View,  TouchableOpacity, StyleSheet, Alert, Image, KeyboardAvoidingView, Platform } from "react-native";
 import { getAuthSignUp } from "../services/AuthService";
 import * as ImagePicker from "expo-image-picker";
-import { useTheme, Text, TextInput } from "react-native-paper";
+import { useTheme, Text, TextInput, HelperText } from "react-native-paper";
 function SignUpScreen({ navigation }: any) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [avatar, setAvatar] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const theme = useTheme();
   const pickAvatar = async () => {
@@ -26,8 +27,16 @@ function SignUpScreen({ navigation }: any) {
   };
 
   const handleSignUp = async () => {
+    setErrorMessage("");
+
     if (!username || !email || !password) {
-      Alert.alert("Missing Fields", "Please fill out all fields.");
+      setErrorMessage("Please fill out all fields.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrorMessage("Please enter a valid email address.");
       return;
     }
 
@@ -40,19 +49,27 @@ function SignUpScreen({ navigation }: any) {
         }
       : undefined;
 
-    const { data, error } = await getAuthSignUp(
-      username,
-      email,
-      password,
-      fileToUpload as any
-    );
-    setLoading(false);
+        try {
+          const { data, error } = await getAuthSignUp(
+            username,
+            email,
+            password,
+            fileToUpload as any
+          );
 
-    if (error) {
-      Alert.alert("Sign up failed", error.message || "Something went wrong.");
-    } else {
-      Alert.alert("Success", "Account created successfully!");
-    }
+          if (error) {
+            setErrorMessage(
+              error.message || "Sign up failed. Please try again."
+            );
+          } else {
+            Alert.alert("Success", "Account created successfully!");
+          }
+        } catch (err) {
+          console.error("Sign up error:", err);
+          setErrorMessage("Something went wrong. Please try again later.");
+        } finally {
+          setLoading(false);
+        }
   };
 
   return (
@@ -111,6 +128,13 @@ function SignUpScreen({ navigation }: any) {
           onChangeText={setPassword}
           style={{ marginBottom: 8, backgroundColor: "#EDE7F6", borderRadius: 8 }}
         />
+
+        
+        {errorMessage ? (
+          <HelperText type="error" visible={true}>
+            {errorMessage}
+          </HelperText>
+        ) : null}
 
       <TouchableOpacity
         style={[styles.primaryButton, loading && styles.buttonDisabled]}

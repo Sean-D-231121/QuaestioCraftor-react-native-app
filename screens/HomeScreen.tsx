@@ -4,63 +4,65 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  ActivityIndicator, 
+  ActivityIndicator,
   ScrollView,
   Image,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Quiz, { fetchRecentQuizzes, fetchQuizQuestions } from "../services/Quizapi";
+import Quiz, {
+  fetchRecentQuizzes,
+  fetchQuizQuestions,
+} from "../services/Quizapi";
 import { loadProfile } from "../services/ProfileService";
 import { Avatar, Button, Card, useTheme, Text } from "react-native-paper";
-
-
 
 function HomeScreen({ navigation }: any) {
   const [recentQuizzes, setRecentQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
-  
+
   const theme = useTheme();
   useEffect(() => {
-  // Load immediately
-  loadRecentQuizzes();
-  fetchProfile();
-
-  // Refresh every 10 seconds
-  const interval = setInterval(() => {
+    // Load immediately
     loadRecentQuizzes();
     fetchProfile();
-  }, 10000);
 
-  // Cleanup interval on unmount
-  return () => clearInterval(interval);
-}, []);
+    // Refresh every 10 seconds
+    const interval = setInterval(() => {
+      loadRecentQuizzes();
+      fetchProfile();
+    }, 10000);
 
-const fetchProfile = async () => {
-  try {
-    setLoading(true);
-    const data = await loadProfile();
-    if (data) setProfile(data);
-  } catch (error) {
-    console.error("Error loading profile:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+    // Cleanup interval on unmount
+    return () => clearInterval(interval);
+  }, []);
 
-const loadRecentQuizzes = async () => {
-  try {
-    setLoading(true);
-    const data = await fetchRecentQuizzes();
-    if (data) setRecentQuizzes(data);
-  } catch (error) {
-    console.error("Error fetching recent quizzes:", error);
-  } finally {
-    setLoading(false);
-  }
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const data = await loadProfile();
+      if (data) setProfile(data);
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handlePlayQuiz = async (quiz : any) => {
+  const loadRecentQuizzes = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchRecentQuizzes();
+      if (data) setRecentQuizzes(data);
+    } catch (error) {
+      console.error("Error fetching recent quizzes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePlayQuiz = async (quiz: any) => {
     try {
       const questions = await fetchQuizQuestions(quiz.quizid);
       if (!questions || questions.length === 0) {
@@ -78,29 +80,42 @@ const loadRecentQuizzes = async () => {
   };
 
   return (
-     <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <View style={styles.header}>
         {profile?.avatar_url ? (
-          <Avatar.Image size={48} source={{ uri: profile.avatar_url }} />
+          <Avatar.Image size={56} source={{ uri: profile.avatar_url }} />
         ) : (
-          <Avatar.Icon size={48} icon="account" />
+          <Avatar.Icon size={56} icon="account" />
         )}
-        <View style={{ marginLeft: 10 }}>
-          <Text variant="titleSmall">Welcome</Text>
-          <Text variant="titleMedium">Hello {profile?.username}!</Text>
+
+        <View style={styles.headerTextContainer}>
+          <Text variant="titleSmall" style={styles.welcomeText}>
+            Welcome
+          </Text>
+          <Text variant="titleMedium" style={styles.usernameText}>
+            Hello {profile?.username || "User"}!
+          </Text>
         </View>
       </View>
 
       {/* ACTION CARDS */}
       <View style={styles.actions}>
-        <Card style={styles.actionCard} onPress={() => navigation.navigate("CreateQuiz")}>
+        <Card
+          style={styles.actionCard}
+          onPress={() => navigation.navigate("CreateQuiz")}
+        >
           <Card.Content style={styles.cardContent}>
             <Ionicons name="add-circle-outline" size={32} color="#fff" />
             <Text style={styles.cardText}>Generate Quiz</Text>
           </Card.Content>
         </Card>
 
-        <Card style={styles.actionCard} onPress={() => navigation.navigate("Leaderboard")}>
+        <Card
+          style={styles.actionCard}
+          onPress={() => navigation.navigate("Leaderboard")}
+        >
           <Card.Content style={styles.cardContent}>
             <Ionicons name="trophy-outline" size={32} color="#fff" />
             <Text style={styles.cardText}>Leaderboards</Text>
@@ -109,7 +124,9 @@ const loadRecentQuizzes = async () => {
       </View>
 
       {loading ? (
-        <View style={styles.quizList}>
+        <ScrollView style={styles.quizList}  
+        nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false}>
           {recentQuizzes.map((quiz) => (
             <Card key={quiz.quizid} style={styles.quizCard}>
               <Card.Title
@@ -121,16 +138,18 @@ const loadRecentQuizzes = async () => {
                   icon="play-circle"
                   mode="contained"
                   onPress={() => handlePlayQuiz(quiz)}
-                   buttonColor="#6C63FF"
+                  buttonColor="#6C63FF"
                 >
                   Play Quiz
                 </Button>
               </Card.Actions>
             </Card>
           ))}
-        </View>
+        </ScrollView>
       ) : (
-        <View style={styles.quizList}>
+        <ScrollView style={styles.quizList}  
+        nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false}>
           {recentQuizzes.map((quiz) => (
             <Card key={quiz.quizid} style={styles.quizCard}>
               <Card.Title
@@ -142,14 +161,14 @@ const loadRecentQuizzes = async () => {
                   icon="play-circle"
                   mode="contained"
                   onPress={() => handlePlayQuiz(quiz)}
-                   buttonColor="#6C63FF"
+                  buttonColor="#6C63FF"
                 >
                   Play Quiz
                 </Button>
               </Card.Actions>
             </Card>
           ))}
-        </View>
+        </ScrollView>
       )}
     </ScrollView>
   );
@@ -165,7 +184,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 25,
+    paddingTop: Platform.OS === "ios" ? 40 : 10, // helps on iOS
+    paddingHorizontal: 4,
+    borderRadius: 12,
   },
+
   actions: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -186,11 +209,27 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   quizList: {
+    maxHeight: 600,
     marginTop: 10,
   },
   quizCard: {
     marginBottom: 15,
     borderRadius: 12,
   },
-  
+  headerTextContainer: {
+    marginLeft: 12,
+    flexShrink: 1,
+  },
+
+  welcomeText: {
+    color: "#6C63FF",
+    fontWeight: "600",
+    letterSpacing: 0.3,
+  },
+
+  usernameText: {
+    color: "#1A1A60",
+    fontWeight: "700",
+    fontSize: 18,
+  },
 });

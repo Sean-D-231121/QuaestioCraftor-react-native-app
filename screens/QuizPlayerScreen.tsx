@@ -168,23 +168,6 @@ if (finished) {
           </TouchableOpacity>
         </>
       )}
-      {question.type === "Short answer" && (
-        <>
-          <TextInput
-            placeholder="Enter your answer"
-            placeholderTextColor="#8a7fa8"
-            style={styles.input}
-            value={shortAnswer}
-            onChangeText={setShortanswer}
-          ></TextInput>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => handleAnswer(shortAnswer)}
-          >
-            <Text style={styles.buttonText}>Submit Answer</Text>
-          </TouchableOpacity>
-        </>
-      )}
     </ScrollView>
   );
 }

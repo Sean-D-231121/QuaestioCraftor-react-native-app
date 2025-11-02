@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  Platform,
 } from "react-native";
 import "../assets/Blank-image.jpg";
 import { fetchLeaderboard } from "../services/QuizAttemptAPI";
@@ -37,7 +38,7 @@ export default function LeaderboardScreen({ navigation }: any) {
   ];
 
   
-  const rest = [...sortedLeaderboard.slice(3, 9)];
+  const rest = [...sortedLeaderboard.slice(3, 10)];
   while (rest.length < 6) {
     rest.push({
       id: `vacant-${rest.length + 4}`,
@@ -73,10 +74,24 @@ export default function LeaderboardScreen({ navigation }: any) {
 
           return (
             <View key={user.id} style={[styles.podiumItem, { marginTop, width: circleSize * 1.1 }]}>
-              <Image
-                source={user.avatar_url ? { uri: user.avatar_url } : require("../assets/Blank-image.jpg")}
-                style={[styles.circle, { width: circleSize, height: circleSize }]}
-              />
+              <View style={[styles.circleWrapper, { width: circleSize, height: circleSize }]}>
+  {user.avatar_url ? (
+    <Image
+      source={{ uri: user.avatar_url }}
+      style={[styles.circle, { width: circleSize, height: circleSize }]}
+    />
+  ) : (
+    <>
+      <Image
+        source={require("../assets/Blank-image.jpg")}
+        style={[styles.circle, { width: circleSize, height: circleSize }]}
+      />
+      <Text style={styles.overlayText} numberOfLines={1} ellipsizeMode="tail">
+        {user.username}
+      </Text>
+    </>
+  )}
+</View>
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>{user.rank}</Text>
               </View>
@@ -117,7 +132,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     textAlign: "center",
     color: "#1A1A60",
-    marginTop: 8,
+    marginTop: Platform.OS === "ios" ? 40 : 10,
   },
   filterRow: {
     flexDirection: "row",
@@ -210,4 +225,18 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginRight: 8,
   },
+  circleWrapper: {
+  position: "relative",
+  justifyContent: "center",
+  alignItems: "center",
+},
+overlayText: {
+  position: "absolute",
+  textAlign: "center",
+  color: "#1A1A60",
+  fontWeight: "700",
+  fontSize: 14,
+  paddingHorizontal: 6,
+},
+
 });
