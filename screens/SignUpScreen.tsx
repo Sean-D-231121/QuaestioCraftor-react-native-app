@@ -1,8 +1,9 @@
 // screens/SignUpScreen.tsx
 import React, { useState } from "react";
-import { ScrollView, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from "react-native";
+import { ScrollView, View,  TouchableOpacity, StyleSheet, Alert, Image, KeyboardAvoidingView, Platform } from "react-native";
 import { getAuthSignUp } from "../services/AuthService";
 import * as ImagePicker from "expo-image-picker";
+import { useTheme, Text, TextInput } from "react-native-paper";
 function SignUpScreen({ navigation }: any) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -10,6 +11,7 @@ function SignUpScreen({ navigation }: any) {
   const [avatar, setAvatar] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
+  const theme = useTheme();
   const pickAvatar = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -54,8 +56,23 @@ function SignUpScreen({ navigation }: any) {
   };
 
   return (
+     <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+        >
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
+      <Text
+          variant="headlineLarge"
+          style={{
+            textAlign: "center",
+            color: theme.colors.secondary,
+            marginBottom: 20,
+            fontWeight: "bold",
+          }}
+        >
+          Create Account
+        </Text>
       <TouchableOpacity onPress={pickAvatar}>
         {avatar ? (
           <Image source={{ uri: avatar.uri }} style={styles.avatarPreview} />
@@ -66,33 +83,34 @@ function SignUpScreen({ navigation }: any) {
         )}
       </TouchableOpacity>
       <Text style={styles.label}>Username</Text>
-      <TextInput
-        placeholder="Username"
-        placeholderTextColor="#8a7fa8"
-        value={username}
-        onChangeText={setUsername}
-        style={styles.input}
-      />
+         <TextInput
+          placeholder="JohnDoe"
+          mode="outlined"
+          value={username}
+          onChangeText={setUsername}
+          style={{ marginBottom: 16, backgroundColor: "#EDE7F6" }}
+        />
 
       <Text style={styles.label}>Email</Text>
       <TextInput
-        placeholder="you@example.com"
-        placeholderTextColor="#8a7fa8"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        style={styles.input}
-      />
+          placeholder="you@example.com"
+          mode="outlined"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          style={{ marginBottom: 16, backgroundColor: "#EDE7F6", borderRadius: 8 }}
+        />
 
       <Text style={styles.label}>Password</Text>
       <TextInput
-        placeholder="Password"
-        placeholderTextColor="#8a7fa8"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={styles.input}
-      />
+          placeholder="Enter your password"
+          mode="outlined"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+          style={{ marginBottom: 8, backgroundColor: "#EDE7F6", borderRadius: 8 }}
+        />
 
       <TouchableOpacity
         style={[styles.primaryButton, loading && styles.buttonDisabled]}
@@ -109,6 +127,7 @@ function SignUpScreen({ navigation }: any) {
         Already have an account? Sign in
       </Text>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -130,11 +149,6 @@ const styles = StyleSheet.create({
   label: { fontSize: 20, fontWeight: "700", color: "#1A1A60", marginBottom: 8 },
   input: {
     backgroundColor: "#EDE7F6",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 20,
-    fontSize: 16,
     color: "#1A1A60",
   },
   primaryButton: {
@@ -154,6 +168,8 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     alignSelf: "center",
     marginBottom: 20,
+    borderColor: "#6C63FF",
+    borderWidth: 2,
   },
   avatarPlaceholder: {
     width: 120,
@@ -164,5 +180,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
+    borderColor: "#6C63FF",
+    borderWidth: 2,
   },
 });

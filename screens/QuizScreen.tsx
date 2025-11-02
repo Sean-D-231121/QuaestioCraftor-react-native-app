@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
-  TextInput,
   ScrollView,
-  ActivityIndicator,
   Alert,
   Image,
+  KeyboardAvoidingView 
 } from "react-native";
+import { Text, TextInput, ActivityIndicator, Button } from "react-native-paper";
 import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
 import { saveQuiz, saveQuestions } from "../services/Quizapi";
 import { loadProfile } from "../services/ProfileService";
+
 
 
 async function generateQuiz({ quizType, difficulty, questionCount, topic } : any) {
@@ -46,7 +46,6 @@ const timeout = setTimeout(() => controller.abort(), 300000);
  
   
   const quiz = await response.json();
-  //  console.log("Generated Quiz:", quiz);
   return quiz;
 }
 
@@ -104,6 +103,9 @@ function CreateQuizScreen({ navigation }: any) {
          quizId,
        });
        setTopic("");
+       setDifficulty(null);
+       setQuizType(null);
+       setQuestionCount(5);
 
 
      } catch (error: any) {
@@ -115,6 +117,7 @@ function CreateQuizScreen({ navigation }: any) {
    };
 
   return (
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <Image source={{ uri: profile?.avatar_url }} style={styles.avatar} />
@@ -168,34 +171,33 @@ function CreateQuizScreen({ navigation }: any) {
         onValueChange={setQuestionCount}
       />
 
-      {/* File Upload Placeholder
-      <View style={styles.uploadBox}>
-        <Text style={styles.uploadText}>
-          Drag and drop file(.jpeg, .png, .pdf)
-        </Text>
-      </View> */}
-
-      {/* Input for topic */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          placeholder="please enter what you want to test on."
-          placeholderTextColor="#666"
-          style={styles.input}
-          value={topic}
-          onChangeText={setTopic}
-          multiline={true}
-          numberOfLines={2}
-          blurOnSubmit={false}
-        />
-        <TouchableOpacity style={styles.arrowButton} onPress={handleCreateQuiz} disabled={loading}>
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Ionicons name="arrow-forward" size={20} color="#fff" />
-          )}
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      <TextInput
+        placeholder="Enter what you want to test on"
+        value={topic}
+        onChangeText={setTopic}
+        multiline
+        numberOfLines={2}
+        mode="outlined"
+         style={{ marginVertical: 16, backgroundColor: '#EDE7F6' }}
+      />
+      <Button
+        mode="contained"
+        onPress={handleCreateQuiz}
+        disabled={loading}
+        contentStyle={{ flexDirection: "row-reverse", justifyContent: "center" }}
+        icon={() =>
+          loading ? <ActivityIndicator color="#fff" /> : <Ionicons name="arrow-forward" size={20} color="#fff" />
+        }
+        style={{
+    borderRadius: 10,
+    paddingVertical: 5,
+    backgroundColor: loading ? 'rgba(108, 99, 255, 0.5)' : '#6C63FF', 
+    }}
+        >
+          {loading ? "Creating..." : "Create Quiz"}
+      </Button>
+      </ScrollView>
+      </KeyboardAvoidingView>
   );
 }
 export default CreateQuizScreen;
@@ -219,12 +221,12 @@ const styles = StyleSheet.create({
   },
   welcome: {
     fontSize: 14,
-    color: "#333",
+    color: "#1A1A60",
   },
   username: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#000",
+    color: "#1A1A60",
   },
   buttonRow: {
     flexDirection: "row",
@@ -243,7 +245,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#6C63FF",
   },
   buttonText: {
-    color: "#333",
+    color: "#1A1A60",
     fontWeight: "500",
   },
   activeButtonText: {
@@ -256,47 +258,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#1A1A60",
   },
-  uploadBox: {
-    backgroundColor: "#1A1A60",
-    borderRadius: 12,
-    padding: 40,
-    marginTop: 20,
-    alignItems: "center",
-  },
-  uploadText: {
-    color: "#fff",
-    fontSize: 14,
-    textAlign: "center",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 25,
-    backgroundColor: "#EDE7F6",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    position: "relative",
-  },
-  input: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingRight: 56,
-    fontSize: 14,
-    minHeight: 44,
-    textAlignVertical: "top",
-  },
-  arrowButton: {
-    backgroundColor: "#1A1A60",
-    padding: 10,
-    borderRadius: 20,
-    position: "absolute",
-    right: 8,
-    top: "50%",
-    transform: [{ translateY: -20 }],
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+ 
+  
+  
 });

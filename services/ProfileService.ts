@@ -75,7 +75,6 @@ export const updateAvatar = async (fileUri: string) => {
   if (!session || !session.user?.id) throw new Error('User not signed in');
 
   const userId = session.user.id;
-
   const fileExt = fileUri.split('.').pop() || 'jpg';
   const fileName = `${userId}.${fileExt}`;
 
@@ -100,10 +99,10 @@ export const updateAvatar = async (fileUri: string) => {
 
   // Update user table
   const { data: updated, error: updateError } = await supabase
-    .from('users')
-    .update({ avatar_url: publicUrl })
-    .eq('auth_id', userId)
-    .select();
+  .from('users')
+  .update({ avatar_url: publicUrl })
+  .eq('auth_id', userId)
+  .select();
 
   if (updateError) throw updateError;
 

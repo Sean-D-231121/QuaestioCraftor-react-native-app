@@ -1,7 +1,6 @@
-import React, { use, useEffect, useState } from "react";
+import React, {useEffect, useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   Alert,
   Image,
@@ -12,6 +11,7 @@ import * as ImagePicker from "expo-image-picker";
 import { supabase } from "../supabase";
 import { loadProfile, loadQuizStats, updateAvatar } from "../services/ProfileService";
 import { loadUserQuizHistory } from "../services/Quizapi";
+import { Card, Text } from "react-native-paper";
 
 function ProfileScreen({ navigation }: any) {
   const [profile, setProfile] = useState<any>(null);
@@ -35,7 +35,7 @@ function ProfileScreen({ navigation }: any) {
   const data = await loadProfile();
   if (data) {
     setProfile(data);
-    const quizStats = await loadQuizStats(data.id); // use user id
+    const quizStats = await loadQuizStats(data.id); 
     const history = await loadUserQuizHistory(data.id); // load quiz history
     setStats(quizStats);
     setQuizHistory(history);
@@ -156,32 +156,36 @@ const handleChangeAvatar = async () => {
         </TouchableOpacity>
       </View>
 
-      {activeTab === "history" ? (
-        <ScrollView style={{ width: "100%", paddingTop: 12, height: 300 }}>
+       {activeTab === "history" ? (
+        <View style={{ width: "100%", marginTop: 16 }}>
           {quizhistory.length > 0 ? (
             quizhistory.map((q) => (
-              <View key={q.id} style={styles.quizCard}>
-                <Text style={styles.quizTitle}>{q.title}</Text>
-                <View style={styles.quizFooter}>
-                  <Text style={styles.quizMeta}>Questions : {q.questions}</Text>
-                  <Text style={styles.quizMeta}>Score : {q.score}</Text>
-                </View>
-              </View>
-              ))
-            ) : (
-            <Text style={{ textAlign: "center", marginTop: 20, color: "#1A1A60" }}>
+              <Card key={q.id} style={styles.quizCard} mode="outlined">
+                <Card.Title title={q.title} titleVariant="titleMedium"  titleStyle={{ color: "#1A1A60" }} />
+                <Card.Content>
+                  <Text>Questions: {q.questions}</Text>
+                  <Text>Score: {q.score}</Text>
+                </Card.Content>
+              </Card>
+            ))
+          ) : (
+            <Text
+              variant="bodyLarge"
+              style={{ textAlign: "center", marginTop: 20, color: "#1A1A60" }}
+            >
               No quiz history yet.
-              </Text>
-            )}
-        </ScrollView>
-      ) : (
-        <View style={{ width: "100%", paddingTop: 12 }}>
-          <View style={styles.infoCard}>
-            <Text >Email</Text>
-            <Text >{profile?.email ?? "—"}</Text>
-          </View>
+            </Text>
+          )}
         </View>
+      ) : (
+        <Card style={{ width: "100%", marginTop: 16 }}>
+          <Card.Content>
+            <Text variant="bodyMedium">Email</Text>
+            <Text variant="titleSmall">{profile?.email ?? "—"}</Text>
+          </Card.Content>
+        </Card>
       )}
+
 
       <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
         <Text style={styles.signOutText}>Sign out</Text>
@@ -207,8 +211,8 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   avatar: {
-    width: 160,
-    height: 160,
+    width: 120,
+    height: 120,
     borderRadius: 80,
     backgroundColor: "#ddd",
     marginBottom: 12,
@@ -235,7 +239,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
-  statBlock: { flex: 1, alignItems: "center", paddingVertical: 12 },
+  statBlock: { flex: 1, alignItems: "center", paddingVertical: 5 },
   statLabel: { color: "#1A1A60", fontSize: 14, textAlign: "center" },
   statValue: {
     color: "#1A1A60",
@@ -264,7 +268,7 @@ const styles = StyleSheet.create({
   segmentTextActive: { color: "#fff" },
 
   quizCard: {
-    backgroundColor: "#fff",
+    backgroundColor: "#EDE7F6",
     borderRadius: 12,
     borderColor: "#6C63FF",
     borderWidth: 0,
@@ -272,22 +276,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     elevation: 1,
   },
-  quizTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A60",
-    padding: 16,
-    backgroundColor: "#EDE7F6",
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-  },
-  quizFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 12,
-    backgroundColor: "#6C63FF",
-  },
-  quizMeta: { color: "#fff", fontWeight: "700" },
+ 
 
   infoCard: { backgroundColor: "#fff", padding: 16, borderRadius: 12 },
 

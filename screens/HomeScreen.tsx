@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
@@ -12,7 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import Quiz, { fetchRecentQuizzes, fetchQuizQuestions } from "../services/Quizapi";
 import { loadProfile } from "../services/ProfileService";
-import { supabase } from "../supabase";
+import { Avatar, Button, Card, useTheme, Text } from "react-native-paper";
 
 
 
@@ -20,8 +19,8 @@ function HomeScreen({ navigation }: any) {
   const [recentQuizzes, setRecentQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
-
-
+  
+  const theme = useTheme();
   useEffect(() => {
   // Load immediately
   loadRecentQuizzes();
@@ -79,64 +78,90 @@ const loadRecentQuizzes = async () => {
   };
 
   return (
-    <View style={styles.container}>
+     <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.header}>
-              <Image source={{ uri: profile?.avatar_url }} style={styles.avatar} />
-              <View>
-                <Text style={styles.welcome}>Welcome</Text>
-                <Text style={styles.username}>Hello {profile?.username}!</Text>
-              </View>
-            </View>
+        {profile?.avatar_url ? (
+          <Avatar.Image size={48} source={{ uri: profile.avatar_url }} />
+        ) : (
+          <Avatar.Icon size={48} icon="account" />
+        )}
+        <View style={{ marginLeft: 10 }}>
+          <Text variant="titleSmall">Welcome</Text>
+          <Text variant="titleMedium">Hello {profile?.username}!</Text>
+        </View>
+      </View>
 
+      {/* ACTION CARDS */}
       <View style={styles.actions}>
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate("CreateQuiz")}
-        >
-          <Ionicons name="add-circle-outline" size={32} color="#fff" />
-          <Text style={styles.cardText}>Generate Quiz</Text>
-        </TouchableOpacity>
+        <Card style={styles.actionCard} onPress={() => navigation.navigate("CreateQuiz")}>
+          <Card.Content style={styles.cardContent}>
+            <Ionicons name="add-circle-outline" size={32} color="#fff" />
+            <Text style={styles.cardText}>Generate Quiz</Text>
+          </Card.Content>
+        </Card>
 
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate("Leaderboard")}
-        >
-          <Ionicons name="trophy-outline" size={32} color="#fff" />
-          <Text style={styles.cardText}>Leaderboards</Text>
-        </TouchableOpacity>
+        <Card style={styles.actionCard} onPress={() => navigation.navigate("Leaderboard")}>
+          <Card.Content style={styles.cardContent}>
+            <Ionicons name="trophy-outline" size={32} color="#fff" />
+            <Text style={styles.cardText}>Leaderboards</Text>
+          </Card.Content>
+        </Card>
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#6C63FF" />
-      ) : (
-        <ScrollView
-        
-        contentContainerStyle={styles.quizScroll}
-      >
-        {recentQuizzes.map((quiz) =>
-        <View key={quiz.quizid} style={styles.quizCard}>
-          <Text style={styles.quizTitle}>{quiz.topic}</Text>
-          <Text style={styles.quizMeta}>
-                {quiz.quiz_type} • {quiz.difficulty} • {quiz.question_count} Questions
-          </Text>
-          <TouchableOpacity
-          style={styles.playButton}
-          onPress={() => handlePlayQuiz(quiz)}>
-            <Ionicons name="play-circle" size={28} color="#6C63FF" />
-            <Text style={styles.playText}>Play Quiz</Text>
-        </TouchableOpacity>
+        <View style={styles.quizList}>
+          {recentQuizzes.map((quiz) => (
+            <Card key={quiz.quizid} style={styles.quizCard}>
+              <Card.Title
+                title={quiz.topic}
+                subtitle={`${quiz.quiz_type} • ${quiz.difficulty} • ${quiz.question_count} Questions`}
+              />
+              <Card.Actions>
+                <Button
+                  icon="play-circle"
+                  mode="contained"
+                  onPress={() => handlePlayQuiz(quiz)}
+                   buttonColor="#6C63FF"
+                >
+                  Play Quiz
+                </Button>
+              </Card.Actions>
+            </Card>
+          ))}
         </View>
-        )}
-        
-        </ScrollView>
+      ) : (
+        <View style={styles.quizList}>
+          {recentQuizzes.map((quiz) => (
+            <Card key={quiz.quizid} style={styles.quizCard}>
+              <Card.Title
+                title={quiz.topic}
+                subtitle={`${quiz.quiz_type} • ${quiz.difficulty} • ${quiz.question_count} Questions`}
+              />
+              <Card.Actions>
+                <Button
+                  icon="play-circle"
+                  mode="contained"
+                  onPress={() => handlePlayQuiz(quiz)}
+                   buttonColor="#6C63FF"
+                >
+                  Play Quiz
+                </Button>
+              </Card.Actions>
+            </Card>
+          ))}
+        </View>
       )}
-    </View>
+    </ScrollView>
   );
 }
+
 export default HomeScreen;
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#f5f5f5" },
-   header: {
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  header: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 25,
@@ -146,66 +171,26 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 20,
   },
-  card: {
+  actionCard: {
     backgroundColor: "#6C63FF",
-    padding: 20,
     borderRadius: 12,
-    alignItems: "center",
     width: "48%",
   },
-  cardText: { color: "#fff", marginTop: 8, fontWeight: "600" },
-  sectionTitle: { fontSize: 18, fontWeight: "600", marginBottom: 10 },
-
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    backgroundColor: "#6C63FF",
-    paddingVertical: 10,
-    borderRadius: 12,
-    position: "absolute",
-    bottom: 20,
-    left: 20,
-    right: 20,
+  cardContent: {
+    alignItems: "center",
+    paddingVertical: 20,
   },
-  navText: { color: "#fff", fontSize: 12, textAlign: "center" },
-   quizScroll: { paddingVertical: 10 ,justifyContent: "center",alignItems: "center" },
+  cardText: {
+    color: "#fff",
+    fontWeight: "600",
+    marginTop: 8,
+  },
+  quizList: {
+    marginTop: 10,
+  },
   quizCard: {
-    backgroundColor: "#fff",
+    marginBottom: 15,
     borderRadius: 12,
-    padding: 16,
-    marginRight: 12,
-    width: "95%",
-    elevation: 3,
-    height: 140,
-    marginBottom: 16,
-    justifyContent: "center",
-    alignItems: "center",
   },
-  quizTitle: { fontSize: 16, fontWeight: "700", marginBottom: 6, color: "#1A1A60", margin: "auto" },
-  quizMeta: { fontSize: 14, color: "#666", marginBottom: 10 },
-  playButton: {
-    flexDirection: "row",
-    backgroundColor: "#6C63FF",
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    width: "100%",
-  },
-  playText: { color: "#fff", fontWeight: "600", marginLeft: 6, textAlign: "center" },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-    welcome: {
-    fontSize: 14,
-    color: "#333",
-  },
-  username: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#000",
-  },
+  
 });

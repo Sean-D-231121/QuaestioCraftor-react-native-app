@@ -38,8 +38,6 @@ export async function completeQuizAttempt(attemptId: string, score: number, tota
     console.error("Supabase update error:", error);
     throw error;
   }
-
-  console.log("Updated attempt:", data);
     if (userId) {
     const { data: userData, error: fetchError } = await supabase
       .from("users")
