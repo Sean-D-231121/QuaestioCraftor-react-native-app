@@ -34,8 +34,9 @@
 * [Features and Functionality](#features-and-functionality)
 * [Concept Process](#concept-process)
   * [Ideation](#ideation)
+  * [Project Pitch Document](#project-pitch-document)
   * [Wireframes](#wireframes)
-  * [Style Guide](#style-guide)
+  * [Schema Visualisation](#schema-visualisation)
 * [Development Process](#development-process)
   * [Implementation Process](#implementation-process)
     * [Highlights](#highlights)
@@ -58,7 +59,7 @@
 **QuaestioCraftor** is an **AI-driven React Native quiz application** designed to help users learn through smart, dynamically generated quizzes.  
 Using AI prompt responses, users can create unique quiz sets, track their progress, and enhance knowledge retention across topics.  
 
-Built with **React Native** and **Supabase** for backend storage and authentication, QuaestioCraftor integrates modern UI/UX practices from **React Native Paper**, **Framer Motion**, and **Expo** for a seamless learning experience.  
+Built with **React Native** and **Supabase** for backend storage and authentication, QuaestioCraftor integrates modern UI/UX practices from **React Native Paper**, and **Expo** for a seamless learning experience.  
 
 ---
 
@@ -69,6 +70,7 @@ Built with **React Native** and **Supabase** for backend storage and authenticat
   - [Expo](https://expo.dev/)
   - [React Navigation](https://reactnavigation.org/)
   - [React Native Paper](https://callstack.github.io/react-native-paper/)
+  - [TypeScript](https://www.typescriptlang.org/)
 
 - **Backend / Database**
   - [Supabase](https://supabase.io/)
@@ -211,84 +213,139 @@ npm start
 
 ## Features and Functionality
 
-### AI Quiz Generation
+### SplashScreen
 
-Create quizzes powered by AI-generated topics and questions.
+- Displays app logo while app resources load.
 
-Choose difficulty levels and topics dynamically.
+<p align="center">
+ <img src="https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/blob/main/assets/Splashscreen.png" align="center" alt="splashscreen" width="20%" height="auto">
+</p>
 
-### Quiz History
+### Sign-up/Sign-in
 
-View past quizzes with scores, topics, and timestamps.
+- Add user avatar for images.
+- Basic Sign-in and Sign up for users with supabase authentication.
 
-### Leaderboard
+<p align="center">
+ <img src="https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/blob/main/assets/Sign-in.png" align="center" alt="Sign-in screen" width="20%" height="auto">
+  <img src="https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/blob/main/assets/Sign-up.png" align="center" alt="Sign-up screen" width="20%" height="auto">
+</p>
 
-Compete with other users or compare your personal progress.
+### Quiz Generation
 
+- Create quizzes powered by AI-generated topics and questions.
+- Choose difficulty levels and topics dynamically.
+  
+<p align="center">
+ <img src="https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/blob/main/assets/Quiz-generation.png" align="center" alt="Quiz Generation" width="20%" height="auto">
+</p>
 ### Profile
 
-Manage user details, avatars, and stats.
+- View past quizzes with scores, topics, and timestamps.
+- View user information
 
-Integration with Supabase authentication.
+<p align="center">
+ <img src="https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/blob/main/assets/Profile.png" align="center" alt="Profile" width="20%" height="auto">
+</p>
 
-### Smooth UI and Animations
+### Leaderboards
 
-Clean interface with consistent color scheme and transitions.
+- See where you rank on leaderboard through filters like today, weekly and all time
 
-Integrated React Native Paper design components.
+<p align="center">
+ <img src="https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/blob/main/assets/Leaderboards.png" align="center" alt="Leaderboards" width="20%" height="auto">
+</p>
 
-### Quiz Insights
+### QuizPlayer
 
-Visual progress overview and statistics.
+- Get choices between MCQ(Multiple choice questions) and True/False questions
+- Displays total correct answers and also which questions were right and wrong.
 
-Insights generated from your quiz attempts.
+<p align="center">
+ <img src="https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/blob/main/assets/QuizPlayer-1.png" align="center" alt="Quiz Player screen 1" width="20%" height="auto">
+</p>
+<p align="center">
+ <img src="https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/blob/main/assets/QuizPlayer-2.png" align="center" alt="Quiz Player screen 2" width="20%" height="auto">
+</p>
+
+### HomeScreeen
+
+- Shortcut for create quiz and leaderboard
+- Play and fetch new recent quizzes
+  
+<p align="center">
+ <img src="https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/blob/main/assets/Home.png" align="center" alt="Home" width="20%" height="auto">
+</p>
    
-Concept Process
-Ideation
+## Concept Process
+### Ideation
 
-The concept began with the idea of "AI as a learning companion" — transforming studying into a personalized experience.
-Instead of static question banks, QuaestioCraftor leverages AI to generate quizzes tailored to user-selected topics and moods, promoting curiosity-based learning.
+The idea came to me through searching the internet and I wanted to create something which could allow anyone to quickly make a quiz and gain basic information about any topic on the internet so I thought up QuaestioCraftor which means "Question" and "Craft" from latin. I wanted to create a casual feel making it comfortable for users to casually learn about stuff at anytime without being competitive.
 
-Core ideas:
+### Core ideas:
 
-Personalized quizzes from natural language prompts.
+- Personalized quizzes from natural language prompts.
 
-Real-time feedback and tracking.
+- Real-time feedback and tracking.
 
-A gamified leaderboard for motivation.
+- A gamified leaderboard for motivation.
 
-Wireframes
-<p align="center"> <img src="assets/wireframe-home.png" width="25%" /> <img src="" width="25%" /> <img src="assets/wireframe-profile.png" width="25%" /> </p>
-Style Guide
-<p align="center"> <img src="assets/colors.png" width="30%" /> <img src="" width="30%" /> <img src="assets/icons.png" width="30%" /> </p>
+### Project Pitch Document
+[Project Pitch](https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/assets/Final-planning-pitch.pdf)
+
+### Wireframes
+<p align="center"> <img src="assets/Wireframes/Quiz Generation Page-Wireframe.jpg" width="25%" /> <img src="assets/Wireframes/Dashoard-Wireframe.jpg" width="25%" /> <img src="assets/Wireframes/QuizPlayerScreen page-Wireframe.jpg" width="25%" /> </p>
+
+### Database Visualisation:
+<p align="center"><img src="assets/Schema-Visualiser.png" width="50%" /> </p>
+
 
 ## Development Process
 ### Implementation Process
 ### Frontend (React Native + Expo)
 
-Developed modular screens using React Navigation.
+- Developed modular screens using React Navigation.
 
-Implemented animations with Reanimated and Framer Motion.
+- Implemented animations with Reanimated.
 
-Integrated Supabase auth and API services.
+- Integrated Supabase auth and API services.
 
-Styled components with React Native Paper.
+- Styled components with React Native Paper.
 
 ### Backend (Supabase + AI Integration)
 
-Connected Supabase for real-time data and auth.
+- Connected Supabase for real-time data and auth.
 
-Integrated AI prompt processing for dynamic quiz generation.
+- Integrated AI prompt processing for dynamic quiz generation.
 
-Used Supabase Postgres for storing user progress and quiz history.
+- Used Supabase Postgres for storing user progress and quiz history.
+
+
+
 
 ## Highlights
 
+- Connecting and exploring supabase as a database alternative and its security options.
+- Creating the leaderboard and getting information from quizattempts table.
+- Deploying and connecting python Open AI API backend to Render that connects to frontend with json output.
 
 ## Challenges
 
+- UI and styling for react-native-paper
+- Leaderboard data organisation
+- Stats calculations and implemention
+- Quiz API connection and quizPlayer implementation
+- Supabase permissions and Image storage
+  
 ## Future Implementation
 
+- Adaptive quizzes that change difficulty based on performance.
+- Flashcard learning mode.
+- Multilingual support (English, Afrikaans, Zulu, etc.).
+- Export quizzes as PDF for offline use.
+- Teacher-specific mode for classroom sharing.
+- AI quiz generation from text/document/URL.
+  
 ## Final Outcome
 ### Mockups
 <p align="center"> <img src="assets/mockup-1.png" width="80%" /> <img src="assets/mockup-2.png" width="80%" /> <img src="assets/mockup-3.png" width="80%" /> </p>
@@ -301,10 +358,20 @@ Video Demonstration
 ## License
 Distributed under the MIT License. See LICENSE for more information
 
-Contact
+## Contact
 
-Sean Dubbelman
-📧 231121@virtualwindow.co.za
-🔗 GitHub: @Sean-D-231121
+**Sean Dubbelman**  
+Email: [231121@virtualwindow.co.za](mailto:231121@virtualwindow.co.za)  
+GitHub: [@Sean](https://github.com/Sean-D-231121)
 
 ## Acknowledgements
+- Armand Pretorious
+- Supabase docs
+- React Native Paper docs
+- Expo
+- OpenAI API
+- Chatgpt/Open AI LLM
+- YouTube for tutorials and guidance
+- Unsplash for user Images
+- User Testers
+- Render.com
