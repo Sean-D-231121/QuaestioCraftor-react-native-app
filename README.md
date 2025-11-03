@@ -384,6 +384,11 @@ The idea came to me through searching the internet and I wanted to create someth
 
 ## Conclusion
 
+QuaestioCraftor was a nice introduction of integrating AI into my projects and understanding prompt engineering
+and Fine tuning. Using Supabase for the first time I felt that it was very easy to implement and a great alternative 
+for Firebase and the permissions felt more secure and easier to create and attach to tables. Throughout this app
+creation I learnt how to make multiple types of AI models and train them with values to improve on themselves.
+
 ## License
 Distributed under the MIT License. See LICENSE for more information
 
