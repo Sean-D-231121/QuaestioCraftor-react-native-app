@@ -24,7 +24,7 @@ async function generateQuiz({
   topic,
 }: any) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000);
+  const timeout = setTimeout(() => controller.abort(), 200000);
 
   try {
     const response = await fetch(
