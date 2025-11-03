@@ -14,7 +14,7 @@
   </a>
   <br />
   <br />
-  <a href="#">View Demo</a>
+  <a href="https://drive.google.com/file/d/1017hbdeWoZ5rdLEOmnYTlhEoMtSovfdC/view?usp=sharing">View Demo</a>
   ·
   <a href="https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/issues">Report Bug</a>
   ·
@@ -41,6 +41,9 @@
   * [Implementation Process](#implementation-process)
     * [Highlights](#highlights)
     * [Challenges](#challenges)
+* [User Testing and Insights](#user-testing-and-insights)
+   * [Question examples and answers](#question-examples-and-answers)
+   * * [Insights](#insights)
   * [Future Implementation](#future-implementation)
 * [Final Outcome](#final-outcome)
   * [Mockups](#mockups)
@@ -263,9 +266,7 @@ npm start
 
 <p align="center">
  <img src="https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/blob/main/assets/QuizPlayer-1.png" align="center" alt="Quiz Player screen 1" width="20%" height="auto">
-</p>
-<p align="center">
- <img src="https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/blob/main/assets/QuizPlayer-2.png" align="center" alt="Quiz Player screen 2" width="20%" height="auto">
+   <img src="https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/blob/main/assets/QuizPlayer-2.png" align="center" alt="Quiz Player screen 2" width="20%" height="auto">
 </p>
 
 ### HomeScreeen
@@ -278,6 +279,7 @@ npm start
 </p>
    
 ## Concept Process
+
 ### Ideation
 
 The idea came to me through searching the internet and I wanted to create something which could allow anyone to quickly make a quiz and gain basic information about any topic on the internet so I thought up QuaestioCraftor which means "Question" and "Craft" from latin. I wanted to create a casual feel making it comfortable for users to casually learn about stuff at anytime without being competitive.
@@ -294,15 +296,19 @@ The idea came to me through searching the internet and I wanted to create someth
 [Project Pitch](https://github.com/Sean-D-231121/QuaestioCraftor-react-native-app/assets/Final-planning-pitch.pdf)
 
 ### Wireframes
+
 <p align="center"> <img src="assets/Wireframes/Quiz Generation Page-Wireframe.jpg" width="25%" /> <img src="assets/Wireframes/Dashoard-Wireframe.jpg" width="25%" /> <img src="assets/Wireframes/QuizPlayerScreen page-Wireframe.jpg" width="25%" /> </p>
 
-### Database Visualisation:
+### Schema Visualisation
+
 <p align="center"><img src="assets/Schema-Visualiser.png" width="50%" /> </p>
 
 
 ## Development Process
+
 ### Implementation Process
-### Frontend (React Native + Expo)
+
+***Frontend (React Native + Expo)***
 
 - Developed modular screens using React Navigation.
 
@@ -311,8 +317,9 @@ The idea came to me through searching the internet and I wanted to create someth
 - Integrated Supabase auth and API services.
 
 - Styled components with React Native Paper.
+  
 
-### Backend (Supabase + AI Integration)
+***Backend (Supabase + AI Integration)***
 
 - Connected Supabase for real-time data and auth.
 
@@ -336,7 +343,22 @@ The idea came to me through searching the internet and I wanted to create someth
 - Stats calculations and implemention
 - Quiz API connection and quizPlayer implementation
 - Supabase permissions and Image storage
-  
+
+## User Testing and Insights
+
+### Question examples and answers
+
+<p align="center"> <img src="assets/User-Testing-Images/Question-1.png" width="50%" /> <img src="assets/User-Testing-Images/Question-2.png" width="50%" /> <img src="assets/User-Testing-Images/Question-3.png" width="50%" /> <img src="assets/User-Testing-Images/Question-4.png" width="50%" />  </p>
+
+### Insights
+
+- People are confused about what MCQ is and the touchpoints for difficulty and quiz type are left out.
+- Not many errors besides waiting for AI backend to create quiz.
+- Sign up had no problems occur when loading besides lacking KeyboarAvoidView component.
+- I need to focus on expanding quiz functionality and editing.
+- Perhaps need to deploy backend some place other than Render.com
+
+
 ## Future Implementation
 
 - Adaptive quizzes that change difficulty based on performance.
@@ -348,10 +370,17 @@ The idea came to me through searching the internet and I wanted to create someth
   
 ## Final Outcome
 ### Mockups
-<p align="center"> <img src="assets/mockup-1.png" width="80%" /> <img src="assets/mockup-2.png" width="80%" /> <img src="assets/mockup-3.png" width="80%" /> </p>
-Video Demonstration
+<p align="center">
+  <img src="assets/Mockups/Mockup-1.png" width="80%" /><br><br>
+  <img src="assets/Mockups/Mockup-2.png" width="80%" /><br><br>
+  <img src="assets/Mockups/Mockup-3.png" width="80%" /><br><br>
+  <img src="assets/Mockups/Mockup-4.png" width="80%" /><br><br>
+  <img src="assets/Mockups/Mockup-5.png" width="80%" />
+</p>
 
-[View Demo]()
+### Video Demonstration 
+
+[View Demo](https://drive.google.com/file/d/1017hbdeWoZ5rdLEOmnYTlhEoMtSovfdC/view?usp=sharing)
 
 ## Conclusion
 
@@ -365,11 +394,11 @@ Email: [231121@virtualwindow.co.za](mailto:231121@virtualwindow.co.za)
 GitHub: [@Sean](https://github.com/Sean-D-231121)
 
 ## Acknowledgements
-- Armand Pretorious
+- [Armand Pretorious]()
 - Supabase docs
 - React Native Paper docs
 - Expo
-- OpenAI API
+- OpenAI API docs
 - Chatgpt/Open AI LLM
 - YouTube for tutorials and guidance
 - Unsplash for user Images
