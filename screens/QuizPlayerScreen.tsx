@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Platform } from "react-native";
 import { saveSubmittedAnswers, startQuizAttempt, completeQuizAttempt } from "../services/QuizAttemptAPI";
 import { loadProfile } from "../services/ProfileService";
 function QuizPlayerScreen({ route, navigation }: any) {
@@ -183,11 +183,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   title: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 10,
-    color: "#1A1A60",
-  },
+      fontSize: 20,
+      fontWeight: "700",
+      marginBottom: 18,
+      color: "#1A1A60",
+      marginTop: Platform.OS === "ios" ? 40 : 10,
+    },
   subtitle: { fontSize: 16, color: "#333", marginBottom: 20 },
   question: { fontSize: 18, marginBottom: 20, color: "#000" },
   button: {
