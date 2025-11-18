@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Platform } from "react-native";
 import { saveSubmittedAnswers, startQuizAttempt, completeQuizAttempt } from "../services/QuizAttemptAPI";
 import { loadProfile } from "../services/ProfileService";
+import { ProgressBar } from "react-native-paper";
 function QuizPlayerScreen({ route, navigation }: any) {
   const { quiz, quizId } = route.params;
   const [profile, setProfile] = useState<any>(null);
@@ -138,6 +139,18 @@ if (finished) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <View style={{ width: "100%" }}>
+        <ProgressBar
+          progress={(current + 1) / quiz.length}
+          color="#6C63FF"
+          style={{ height: 10, borderRadius: 10, marginBottom: 10 }}
+        />
+      </View>
+
+      <Text style={styles.progressText}>
+        {current + 1} / {quiz.length}
+      </Text>
+
       <Text style={styles.title}>Question {current + 1}</Text>
       <Text style={styles.question}>{question.question}</Text>
       {question.type === "MCQ" &&
@@ -220,4 +233,10 @@ const styles = StyleSheet.create({
     height: 200,
     color: "#1A1A60",
   },
+  progressText: {
+  fontSize: 14,
+  color: "#4B5563",
+  marginBottom: 12,
+},
+
 });

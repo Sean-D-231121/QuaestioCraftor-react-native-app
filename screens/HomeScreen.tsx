@@ -15,12 +15,22 @@ import Quiz, {
   fetchQuizQuestions,
 } from "../services/Quizapi";
 import { loadProfile } from "../services/ProfileService";
-import { Avatar, Button, Card, useTheme, Text } from "react-native-paper";
+import {
+  Avatar,
+  Button,
+  Card,
+  useTheme,
+  Text,
+  TextInput,
+} from "react-native-paper";
 
 function HomeScreen({ navigation }: any) {
   const [recentQuizzes, setRecentQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [allQuizzes, setAllQuizzes] = useState<Quiz[]>([]);
+  const [displayQuizzes, setDisplayQuizzes] = useState<Quiz[]>([]);
 
   const theme = useTheme();
   useEffect(() => {
@@ -51,16 +61,20 @@ function HomeScreen({ navigation }: any) {
   };
 
   const loadRecentQuizzes = async () => {
-    try {
-      setLoading(true);
-      const data = await fetchRecentQuizzes();
-      if (data) setRecentQuizzes(data);
-    } catch (error) {
-      console.error("Error fetching recent quizzes:", error);
-    } finally {
-      setLoading(false);
+  try {
+    setLoading(true);
+    const data = await fetchRecentQuizzes(); // ← Fetch ALL quizzes
+    if (data) {
+      setAllQuizzes(data); // store all
+      setDisplayQuizzes(data.slice(0, 10)); // show only 10
     }
-  };
+  } catch (error) {
+    console.error("Error fetching recent quizzes:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handlePlayQuiz = async (quiz: any) => {
     try {
@@ -78,6 +92,19 @@ function HomeScreen({ navigation }: any) {
       alert("Failed to load quiz questions.");
     }
   };
+  useEffect(() => {
+  if (searchQuery.trim() === "") {
+    // No search → show only 10
+    setDisplayQuizzes(allQuizzes.slice(0, 10));
+  } else {
+    // Search → show filtered full list
+    const filtered = allQuizzes.filter((quiz) =>
+      quiz.topic.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setDisplayQuizzes(filtered);
+  }
+}, [searchQuery, allQuizzes]);
+
 
   return (
     <ScrollView
@@ -122,12 +149,22 @@ function HomeScreen({ navigation }: any) {
           </Card.Content>
         </Card>
       </View>
+      <TextInput
+        mode="outlined"
+        placeholder="Search quizzes..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        style={{ marginBottom: 15 }}
+        left={<TextInput.Icon icon="magnify" />}
+      />
 
       {loading ? (
-        <ScrollView style={styles.quizList}  
-        nestedScrollEnabled={true}
-          showsVerticalScrollIndicator={false}>
-          {recentQuizzes.map((quiz) => (
+        <ScrollView
+          style={styles.quizList}
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false}
+        >
+          {displayQuizzes.map((quiz) => (
             <Card key={quiz.quizid} style={styles.quizCard}>
               <Card.Title
                 title={quiz.topic}
@@ -147,10 +184,12 @@ function HomeScreen({ navigation }: any) {
           ))}
         </ScrollView>
       ) : (
-        <ScrollView style={styles.quizList}  
-        nestedScrollEnabled={true}
-          showsVerticalScrollIndicator={false}>
-          {recentQuizzes.map((quiz) => (
+        <ScrollView
+          style={styles.quizList}
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false}
+        >
+          {displayQuizzes.map((quiz) => (
             <Card key={quiz.quizid} style={styles.quizCard}>
               <Card.Title
                 title={quiz.topic}

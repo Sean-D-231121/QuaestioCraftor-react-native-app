@@ -63,12 +63,11 @@ export async function saveQuestions(quizId: string, questions: any[]) {
 }
 
 
-export async function fetchRecentQuizzes(limit = 10) {
+export async function fetchRecentQuizzes() {
   const { data, error } = await supabase
     .from("quizzes")
     .select("quizid, topic, quiz_type, difficulty, question_count, created_at")
     .order("created_at", { ascending: false })
-    .limit(limit);
 
   if (error) throw error;
   return data;
